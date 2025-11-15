@@ -211,15 +211,15 @@ remote_year=${remote_parts[0]}
 remote_month=${remote_parts[1]}
 remote_day=${remote_parts[2]}
 
-# Compare versions (year > month > day) - use arithmetic expansion to avoid octal interpretation
+# Compare versions (year > month > day) - use 10# prefix to force decimal interpretation, avoiding octal
 update_needed=false
-if (( remote_year > installed_year )); then
+if (( 10#$remote_year > 10#$installed_year )); then
   update_needed=true
-elif (( remote_year == installed_year )); then
-  if (( remote_month > installed_month )); then
+elif (( 10#$remote_year == 10#$installed_year )); then
+  if (( 10#$remote_month > 10#$installed_month )); then
     update_needed=true
-  elif (( remote_month == installed_month )); then
-    if (( remote_day > installed_day )); then
+  elif (( 10#$remote_month == 10#$installed_month )); then
+    if (( 10#$remote_day > 10#$installed_day )); then
       update_needed=true
     fi
   fi

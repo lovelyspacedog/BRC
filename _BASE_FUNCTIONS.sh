@@ -150,15 +150,15 @@ brcupdate() {
     local remote_month=${remote_parts[1]}
     local remote_day=${remote_parts[2]}
     
-    # Compare versions (use arithmetic expansion to avoid octal interpretation)
+    # Compare versions (use 10# prefix to force decimal interpretation, avoiding octal)
     local update_available=false
-    if (( remote_year > installed_year )); then
+    if (( 10#$remote_year > 10#$installed_year )); then
         update_available=true
-    elif (( remote_year == installed_year )); then
-        if (( remote_month > installed_month )); then
+    elif (( 10#$remote_year == 10#$installed_year )); then
+        if (( 10#$remote_month > 10#$installed_month )); then
             update_available=true
-        elif (( remote_month == installed_month )); then
-            if (( remote_day > installed_day )); then
+        elif (( 10#$remote_month == 10#$installed_month )); then
+            if (( 10#$remote_day > 10#$installed_day )); then
                 update_available=true
             fi
         fi
