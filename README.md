@@ -76,7 +76,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 
 1. Clone or download this repository:
    ```bash
-   git clone <repository-url> BASHRC
+   git clone https://github.com/lovelyspacedog/BRC.git BASHRC
    cd BASHRC
    ```
 
