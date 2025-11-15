@@ -311,11 +311,13 @@ if [[ "$update_needed" == "true" ]]; then
   
   log_detail "Executing ___INSTALL.sh..."
   log_detail "Auto-answering 'y' to all installation prompts..."
+  log_detail "Disabling copyright splash for automated update..."
   # Provide "y" answers to installer prompts (2 prompts: initial install + reuse existing BASHRC)
   # Use printf instead of yes to avoid exit code issues with pipes
+  # Disable copyright splash by setting COPYRIGHT=false environment variable
   # Temporarily disable set -e to properly capture exit code
   set +e
-  printf "y\ny\n" | bash "$script_dir/___INSTALL.sh"
+  printf "y\ny\n" | COPYRIGHT=false bash "$script_dir/___INSTALL.sh"
   install_exit=$?
   set -e
   if [[ $install_exit -eq 0 ]]; then
