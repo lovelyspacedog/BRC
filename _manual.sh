@@ -1147,8 +1147,9 @@ Installation Steps:
   1. Backup: Creates timestamped backup of ~/.bashrc in ~/.bashrc.backup/
   2. Install: Copies .bashrc.copyToHome to ~/.bashrc
   3. Scripts: Creates ~/BASHRC directory and copies all *.sh files
-  4. Settings: Initializes settings.json with default configuration
-  5. Welcome: Creates motd.txt with installation success message
+  4. Preamble: Generates _PREAMBLE.sh template if it doesn't exist
+  5. Settings: Initializes settings.json with default configuration
+  6. Welcome: Creates motd.txt with installation success message
 
 Safety Features:
   - Interactive confirmation required before installation
@@ -1161,6 +1162,7 @@ Files Created/Modified:
   - ~/.bashrc - Replaced with new configuration
   - ~/.bashrc.backup/YYYYMMDDHHMMSS.bashrc - Timestamped backup
   - ~/BASHRC/ - Directory containing all shell scripts
+  - ~/BASHRC/_PREAMBLE.sh - Generated template (if it doesn't exist)
   - ~/BASHRC/settings.json - Configuration file
   - ~/motd.txt - Welcome message
 
@@ -1280,7 +1282,9 @@ Note: This script checks for updates by comparing the VERSION field in settings.
       update, the script automatically compares files in the backup directory with
       the new installation and displays any custom files that were in your old
       installation but aren't in the new one, helping you identify scripts you may
-      need to port over manually.
+      need to port over manually. Note that _PREAMBLE.sh is not tracked in the
+      repository and will be preserved during updates (the installer only generates
+      it if it doesn't exist).
 EOF
                 return 0
                 ;;
@@ -1353,6 +1357,8 @@ Usage: Edit ~/BASHRC/_PREAMBLE.sh directly
 
 Description:
   - User-editable file for custom shell configuration
+  - Generated automatically by ___INSTALL.sh if it doesn't exist
+  - Not tracked in the git repository (user-customizable)
   - Changes persist even when .bashrc is updated
   - Sourced three times: before interactive check, after interactive check, and at the end
   - Provides separation between system config and user customizations
@@ -1405,7 +1411,10 @@ Note: This file uses a case statement to handle different sourcing contexts.
       need them to run. The file is sourced from .bashrc at three points:
       once before the interactive check (for environment setup), once after
       (for interactive-only features), and once at the end (for post-plugin
-      configuration).
+      configuration). This file is generated automatically by ___INSTALL.sh
+      if it doesn't exist, but is not tracked in the git repository. Your
+      customizations will persist across updates since the file is never
+      overwritten once it exists.
 EOF
                 return 0
                 ;;

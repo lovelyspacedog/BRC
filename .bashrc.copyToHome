@@ -93,6 +93,7 @@ unset __BASHRC_CONFIG
 [[ -f "$HOME/shell-mommy/shell-mommy.sh" && "$enable_shellmommy" == true ]] && {
   source "$HOME/shell-mommy/shell-mommy.sh"
   export PROMPT_COMMAND="mommy \\$\\(exit \$?\\); $PROMPT_COMMAND"
+  export SHELL_MOMMYS_ONLY_NEGATIVE=true
 }
 
 # Starship prompt

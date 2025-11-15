@@ -473,6 +473,47 @@ else
 fi
 shopt -u nullglob
 
+# Create _PREAMBLE.sh if it doesn't exist (user-customizable file)
+log_detail "Checking _PREAMBLE.sh configuration"
+pause
+preamble_file="$bashrc_dir/_PREAMBLE.sh"
+if [[ ! -f "$preamble_file" ]]; then
+  log_detail "Creating _PREAMBLE.sh template"
+  if ! cat <<'PREAMBLE_EOF' > "$preamble_file"; then
+#!/usr/bin/env bash
+
+# This script is USER CUSTOMIZABLE and won't be overwritten by updates.
+
+case "${1^^}" in
+    "--NON-INTERACTIVE"|"-1")
+        # This section runs before the interactive shell is started.
+        # It's used to set up the shell environment.
+
+        return 0
+        ;;
+    "--TAIL"|"-3")
+        # This section runs at the very end of the shell startup.
+        # It's used to set up the shell environment.
+
+        return 0
+        ;;
+    "--INTERACTIVE"|"-2"|*)
+        # This section runs immediately after the interactive shell is started.
+        # It's used to set up the shell environment.
+
+        return 0
+        ;;
+esac
+PREAMBLE_EOF
+    log_warn "Failed to create _PREAMBLE.sh. Installation will continue."
+  else
+    log_success "_PREAMBLE.sh created in $HOME/BASHRC"
+  fi
+  pause
+else
+  log_detail "_PREAMBLE.sh already exists, skipping creation"
+fi
+
 # Check if starship is enabled and create config if needed
 log_detail "Checking starship configuration"
 pause
