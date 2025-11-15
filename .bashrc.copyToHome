@@ -1,0 +1,215 @@
+#!/usr/bin/env bash
+
+# ,---- [ ~/.bashrc ]
+# | Custom bashrc file for my system
+# `-----------------
+#
+# BARK BARK MOTHERFUCKER
+# WARNING: This file will be overwritten by updates !!!
+# Consider using _PREAMBLE.sh for USER CUSTOMIZATIONS
+source "$HOME/BASHRC/_PREAMBLE.sh" --non-interactive
+
+# you need to be more interactive than this
+[[ $- != *i* ]] && return
+
+# WARNING: Changes to this file will eventually be overwritten.
+# Changes to the preamble will not be overwritten.
+source "$HOME/BASHRC/_PREAMBLE.sh"
+
+# Default values
+declare enable_blesh=true
+declare enable_shellmommy=true
+declare enable_wlcopy=true
+declare enable_vimkeys=true
+declare enable_zoxide=true
+declare enable_automotd=true
+declare enable_manual=true
+declare enable_starship=true
+
+# JSON settings file will override default values
+__BASHRC_CONFIG="$HOME/BASHRC/settings.json"
+
+if [[ -f "$__BASHRC_CONFIG" ]]; then
+  if command -v jq >/dev/null 2>&1; then
+    for __trigger in enable_blesh enable_shellmommy enable_wlcopy enable_vimkeys enable_zoxide enable_automotd enable_manual enable_starship; do
+      __value=$(jq -r --arg key "$__trigger" '
+        if has($key) then
+          (.[$key] | if type == "boolean" then tostring else . end)
+        else
+          empty
+        end
+      ' "$__BASHRC_CONFIG")
+      if [[ "$__value" == "true" || "$__value" == "false" ]]; then
+        printf -v "$__trigger" '%s' "$__value"
+      fi
+    done
+    unset __trigger __value
+  else
+    while IFS= read -r __line; do
+      case "$__line" in
+      *\"enable_blesh\"*)
+        __value=$(sed -n 's/.*"enable_blesh"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_blesh="$__value"
+        ;;
+      *\"enable_shellmommy\"*)
+        __value=$(sed -n 's/.*"enable_shellmommy"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_shellmommy="$__value"
+        ;;
+      *\"enable_wlcopy\"*)
+        __value=$(sed -n 's/.*"enable_wlcopy"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_wlcopy="$__value"
+        ;;
+      *\"enable_vimkeys\"*)
+        __value=$(sed -n 's/.*"enable_vimkeys"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_vimkeys="$__value"
+        ;;
+      *\"enable_zoxide\"*)
+        __value=$(sed -n 's/.*"enable_zoxide"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_zoxide="$__value"
+        ;;
+      *\"enable_automotd\"*)
+        __value=$(sed -n 's/.*"enable_automotd"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_automotd="$__value"
+        ;;
+      *\"enable_manual\"*)
+        __value=$(sed -n 's/.*"enable_manual"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_manual="$__value"
+        ;;
+      *\"enable_starship\"*)
+        __value=$(sed -n 's/.*"enable_starship"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && enable_starship="$__value"
+        ;;
+      esac
+    done <"$__BASHRC_CONFIG"
+    unset __line __value
+  fi
+fi
+unset __BASHRC_CONFIG
+
+# Check for helpers
+[[ -f "$HOME/.local/share/blesh/ble.sh" && "$enable_blesh" == true ]] && source "$HOME/.local/share/blesh/ble.sh"
+[[ -f "/usr/bin/wl-copy" && "$enable_wlcopy" == true ]] && alias wl-copy="wl-copy -s Hyprland"
+[[ -f "/usr/share/bash-completion/bash_completion" ]] && source "/usr/share/bash-completion/bash_completion"
+[[ -f "$HOME/shell-mommy/shell-mommy.sh" && "$enable_shellmommy" == true ]] && {
+  source "$HOME/shell-mommy/shell-mommy.sh"
+  export PROMPT_COMMAND="mommy \\$\\(exit \$?\\); $PROMPT_COMMAND"
+}
+
+# Starship prompt
+[[ "$enable_starship" == true ]] && {
+  if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init bash)"
+  else
+    echo "Warning: starship not found, disabling starship prompt" >&2
+    enable_starship=false # Explicitly set to false to avoid further attempts this session
+  fi
+}
+
+# Exports
+export EDITOR=nvim         # Set the editor to neovim
+export VISUAL=nvim         # Set the visual editor to neovim
+export TZ=America/New_York # Set the timezone to America/New_York
+
+# Weather parameters
+if [[ -z "$WTTR_PARAMS" ]]; then # Set the weather parameters for curl
+  # Form localized URL parameters for curl
+  if [[ -t 1 ]] && [[ "$(tput cols)" -lt 125 ]]; then
+    WTTR_PARAMS+='n'
+  fi 2>/dev/null
+  for _token in $(locale LC_MEASUREMENT); do
+    case $_token in
+    1) WTTR_PARAMS+='m' ;;
+    2) WTTR_PARAMS+='u' ;;
+    esac
+  done 2>/dev/null
+  unset _token
+  export WTTR_PARAMS
+fi
+
+# Prompt (is overriden by starship, this is just a fallback)
+export PS1='\[\e[2m\][\t]\[\e[0m\] \[\e[93;3m\]\u\[\e[0m\] \[\e[38;5;33m\]\w\[\e[0m\]  '
+
+# Shell Settings
+[[ "$enable_vimkeys" == true ]] && set -o vi    # Set vi mode, vim keybindings
+shopt -s histappend                             # Enable appending to the history file
+export HISTSIZE=10000                           # Set the history size
+export HISTFILESIZE=20000                       # Set the history file size
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "      # Set the history time format
+export HISTCONTROL=erasedups                    # Set the history control
+export HISTIGNORE="ls:ll:cd:pwd:clear:cls:exit" # Set the history ignore
+shopt -s cmdhist                                # Enable history substitution
+shopt -s lithist                                # Enable history expansion
+shopt -s autocd                                 # Enable cd by typing directory name
+shopt -s cdspell                                # Enable spell checking for cd
+shopt -s cdable_vars                            # Enable cd to variable
+shopt -s checkwinsize                           # Check window size changes
+shopt -s dirspell                               # Enable spell checking for directory names
+shopt -s globstar                               # Enable globstar
+shopt -s direxpand                              # Enable directory expansion
+shopt -s dirspell                               # Enable spell checking for directory names
+shopt -s dotglob                                # Include dotfiles in globbing
+shopt -s extglob                                # Extended globbing
+shopt -s nocaseglob                             # Case-insensitive globbing
+
+
+# PATH
+export PATH="$PATH:$HOME/.cargo/bin"
+export PATH="$PATH:$HOME/.local/bin"
+export PATH="$PATH:$HOME/bin"
+
+# Enhanced Completion
+bind 'set completion-ignore-case on'       # Ignore case in completion
+bind 'set show-all-if-ambiguous on'        # Show all matches if ambiguous
+bind 'set menu-complete-display-prefix on' # Show prefix in completion menu
+bind 'TAB:menu-complete'                   # Tab to complete
+
+# Better Key Bindings
+bind '"\C-f":forward-word'       # Forward word (Ctrl + f)
+bind '"\C-b":backward-word'      # Backward word (Ctrl + b)
+bind '"\C-a":beginning-of-line'  # Beginning of line (Ctrl + a)
+bind '"\C-e":end-of-line'        # End of line (Ctrl + e)
+bind '"\C-u":kill-whole-line'    # Kill whole line (Ctrl + u)
+bind '"\C-k":kill-line'          # Kill line (Ctrl + k)
+bind '"\C-w":backward-kill-word' # Backward kill word (Ctrl + w)
+
+# Plugins & Aliases
+# Resolve BASHRC directory - handles both direct copy and symlink cases
+__BASHRC_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASHRC_DIR="$([[ "$__BASHRC_SOURCE_DIR" == "$HOME/BASHRC" ]] && echo "$__BASHRC_SOURCE_DIR" || echo "$HOME/BASHRC")"
+unset __BASHRC_SOURCE_DIR
+[[ -f "$BASHRC_DIR/_PLUGINS.sh" ]] && source "$BASHRC_DIR/_PLUGINS.sh"
+[[ -f "$BASHRC_DIR/_ALIASES.sh" ]] && source "$BASHRC_DIR/_ALIASES.sh"
+
+# Enable manual help
+if [[ "$enable_manual" == true ]]; then
+  if [[ -f "$BASHRC_DIR/_manual.sh" ]]; then
+    source "$BASHRC_DIR/_manual.sh"
+  else
+    echo "Warning: _manual.sh not found, disabling manual help" >&2
+  fi
+fi
+
+# Startup commands
+[[ "$enable_automotd" == true && -f "$BASHRC_DIR/automotd.sh" ]] && {
+  "$BASHRC_DIR/automotd.sh"
+  sleep 0.5
+}
+type pokefetch &>/dev/null && pokefetch
+type motd &>/dev/null && motd print
+
+# Initialize zoxide
+[[ "$enable_zoxide" == true ]] && {
+  if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init bash)"
+    alias cd="z"
+    alias cdi="zi"
+  else
+    echo "Warning: zoxide not found, disabling zoxide" >&2
+    enable_zoxide=false # Explicitly set to false to avoid further attempts this session
+  fi
+}
+
+# Tail Custom Configuration Goes Here
+# WARNING: This section will be overwritten by updates !!!
+# Consider using _PREAMBLE.sh for USER CUSTOMIZATIONS
+source "$HOME/BASHRC/_PREAMBLE.sh" --tail

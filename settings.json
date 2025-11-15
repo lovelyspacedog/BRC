@@ -1,0 +1,10 @@
+{
+  "enable_blesh": true,
+  "enable_shellmommy": true,
+  "enable_wlcopy": true,
+  "enable_vimkeys": true,
+  "enable_zoxide": true,
+  "enable_automotd": true,
+  "enable_manual": true,
+  "enable_starship": true
+}

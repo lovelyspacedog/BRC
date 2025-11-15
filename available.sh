@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+# List all bash functions currently defined in this shell, assuming
+# ~/.bashrc (and its sourced modules) have already run.
+show_help() {
+  cat <<EOF
+Usage: available [OPTIONS]
+
+List all bash functions currently defined in this shell.
+
+OPTIONS:
+  --all, -a        Show all functions (including those starting with underscore)
+  --hold, -h       Same as --all (show all functions)
+  --help           Show this help message and exit
+
+By default, functions starting with an underscore are filtered out.
+EOF
+}
+
+determine_mode() {
+  local warn_mode="$1"
+  shift || true
+  local mode="filtered"
+  for arg in "$@"; do
+    case "$arg" in
+      --hold|-h|--all|-a)
+        mode="hold"
+        ;;
+      *)
+        if [[ "$warn_mode" == "warn" ]]; then
+          printf 'available: ignoring unknown option: %s\n' "$arg" >&2
+        fi
+        ;;
+    esac
+  done
+  printf '%s' "$mode"
+}
+
+filter_function_list() {
+  local -n _funcs=$1
+  local mode=$2
+  if [[ "$mode" == "hold" ]]; then
+    return
+  fi
+
+  local filtered=()
+  for name in "${_funcs[@]}"; do
+    [[ "$name" == _* ]] && continue
+    filtered+=("$name")
+  done
+  _funcs=("${filtered[@]}")
+}
+
+render_function_table() {
+  local -n _funcs=$1
+
+  if [[ ${#_funcs[@]} -eq 0 ]]; then
+    echo "  (none)"
+    return
+  fi
+
+  local cols=3
+  local width=30
+  local total=${#_funcs[@]}
+  local rows=$(( (total + cols - 1) / cols ))
+
+  for ((r = 0; r < rows; ++r)); do
+    local line=""
+    for ((c = 0; c < cols; ++c)); do
+      local idx=$(( r + c * rows ))
+      if (( idx < total )); then
+        local name="${_funcs[idx]}"
+        if (( ${#name} > width - 3 )); then
+          name="${name:0:width-3}..."
+        fi
+        line+=$(printf '  %-*s' "$width" "$name")
+      else
+        line+=$(printf '  %-*s' "$width" "")
+      fi
+    done
+    printf '%s\n' "$line"
+  done
+}
+
+print_functions() {
+  local mode
+  mode=$(determine_mode warn "$@")
+
+  echo "Functions available after sourcing ~/.bashrc (including sourced files):"
+  local funcs=()
+  while read -r func; do
+    [[ "$func" =~ ^[[:alnum:]_]+$ ]] || continue
+    funcs+=("$func")
+  done < <(compgen -A function | sort)
+
+  filter_function_list funcs "$mode"
+  render_function_table funcs
+}
+
+available() {
+  for arg in "$@"; do
+    if [[ "$arg" == --help ]]; then
+      show_help
+      return 0
+    fi
+  done
+  print_functions "$@"
+}
+
+# If run directly, source ~/.bashrc in an interactive subshell first so
+# that all functions are loaded before listing them.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  for arg in "$@"; do
+    if [[ "$arg" == --help ]]; then
+      show_help
+      exit 0
+    fi
+  done
+  mode=$(determine_mode warn "$@")
+  mapfile -t raw_funcs < <(bash --noprofile -ic 'compgen -A function | sort' 2>/dev/null)
+  funcs=()
+  for func in "${raw_funcs[@]}"; do
+    [[ "$func" =~ ^[[:alnum:]_]+$ ]] || continue
+    funcs+=("$func")
+  done
+  filter_function_list funcs "$mode"
+  echo "Functions available after sourcing ~/.bashrc (including sourced files):"
+  render_function_table funcs
+fi
