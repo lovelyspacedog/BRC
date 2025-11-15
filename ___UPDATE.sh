@@ -246,9 +246,11 @@ if [[ "$update_needed" == "true" ]]; then
     fi
   fi
   
+  bashrc_backup_timestamp=""
+  backup_file=""
   if [[ -f ~/.bashrc ]]; then
-    backup_timestamp=$(date +%Y%m%d%H%M%S)
-    backup_file="$HOME/.bashrc.backup/${backup_timestamp}.bashrc"
+    bashrc_backup_timestamp=$(date +%Y%m%d%H%M%S)
+    backup_file="$HOME/.bashrc.backup/${bashrc_backup_timestamp}.bashrc"
     if ! cp ~/.bashrc "$backup_file"; then
       log_error "Failed to backup ~/.bashrc. Update halted."
       exit 31
@@ -262,6 +264,7 @@ if [[ "$update_needed" == "true" ]]; then
   # 2. Backup ~/BASHRC directory
   log_step "Backup" "Backing up ~/BASHRC directory"
   pause
+  backup_dir=""
   if [[ -d "$INSTALLED_DIR" ]]; then
     backup_timestamp=$(date +%Y%m%d%H%M%S)
     backup_dir="$HOME/BASHRC.backup.$backup_timestamp"
@@ -288,11 +291,73 @@ if [[ "$update_needed" == "true" ]]; then
   if bash "$script_dir/___INSTALL.sh"; then
     log_success "Installation completed successfully!"
     printf "\n"
+    
+    # Check for files in backup that aren't in current installation
+    if [[ -d "$backup_dir" ]]; then
+      log_step "Backup Check" "Checking for custom files in backup"
+      pause
+      
+      # Get list of files in backup and current installation
+      backup_files=()
+      current_files=()
+      
+      # Get all files from backup directory (excluding .git if present)
+      while IFS= read -r -d '' file; do
+        relative_path="${file#$backup_dir/}"
+        backup_files+=("$relative_path")
+      done < <(find "$backup_dir" -type f ! -name '.git*' -print0 2>/dev/null || true)
+      
+      # Get all files from current installation
+      if [[ -d "$INSTALLED_DIR" ]]; then
+        while IFS= read -r -d '' file; do
+          relative_path="${file#$INSTALLED_DIR/}"
+          current_files+=("$relative_path")
+        done < <(find "$INSTALLED_DIR" -type f ! -name '.git*' -print0 2>/dev/null || true)
+      fi
+      
+      # Find files in backup that aren't in current installation
+      missing_files=()
+      for backup_file in "${backup_files[@]}"; do
+        found=false
+        for current_file in "${current_files[@]}"; do
+          if [[ "$backup_file" == "$current_file" ]]; then
+            found=true
+            break
+          fi
+        done
+        if [[ "$found" == "false" ]]; then
+          missing_files+=("$backup_file")
+        fi
+      done
+      
+      if [[ ${#missing_files[@]} -gt 0 ]]; then
+        log_warn "Found ${#missing_files[@]} file(s) in backup that aren't in current installation:"
+        for file in "${missing_files[@]}"; do
+          log_detail "$backup_dir/$file"
+        done
+        printf "\n"
+        log_detail "Please check the backup directory and port over any custom scripts you need:"
+        log_detail "  $backup_dir"
+        printf "\n"
+      else
+        log_success "No additional files found in backup directory"
+        pause
+      fi
+    fi
+    
     printf "Next steps:\n"
     printf "  - Open a new shell to load the updated configuration.\n"
+    if [[ -d "$backup_dir" ]]; then
+      printf "  - Check the backup directory for any custom scripts to port over:\n"
+      printf "        %s\n" "$backup_dir"
+    fi
     printf "  - If you need to revert, use the backups:\n"
-    printf "        cp ~/.bashrc.backup/%s.bashrc ~/.bashrc\n" "$backup_timestamp"
-    printf "        rm -rf ~/BASHRC && mv %s ~/BASHRC\n" "$backup_dir"
+    if [[ -n "$bashrc_backup_timestamp" ]]; then
+      printf "        cp ~/.bashrc.backup/%s.bashrc ~/.bashrc\n" "$bashrc_backup_timestamp"
+    fi
+    if [[ -n "$backup_dir" ]]; then
+      printf "        rm -rf ~/BASHRC && mv %s ~/BASHRC\n" "$backup_dir"
+    fi
     printf "\n"
     exit 0
   else
