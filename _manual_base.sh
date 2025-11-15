@@ -76,6 +76,94 @@ Note: This function calls backup() for each file, so each backup will have
 EOF
             return 0
             ;;
+        brcversion)
+            cat <<EOF
+brcversion - Show BRC Version
+
+Display the currently installed BRC (BASHRC) version.
+
+Usage: brcversion
+
+Description:
+  - Reads the VERSION field from ~/BASHRC/settings.json
+  - Displays the currently installed BRC version
+  - Quick way to check which version you have installed
+
+Behavior:
+  - Reads version from ~/BASHRC/settings.json using jq
+  - Prints version in format: "BRC version: 0.YYYY.MM.DD"
+  - Returns error if settings.json not found or VERSION field missing
+
+Dependencies:
+  - jq (for parsing JSON)
+
+Examples:
+  brcversion              # Shows: BRC version: 0.2025.11.15
+
+Note: This function is a simple way to check your installed BRC version.
+      Use brcupdate() to check if a newer version is available online.
+EOF
+            return 0
+            ;;
+        brcupdate)
+            cat <<EOF
+brcupdate - Check for BRC Updates
+
+Check if a newer version of BRC is available in the repository.
+
+Usage: brcupdate
+
+Description:
+  - Compares installed version with the repository version online
+  - Downloads settings.json from GitHub to get repository version
+  - Parses and compares version numbers (format: 0.YYYY.MM.DD)
+  - Informs user if an update is available and how to update
+  - Does not perform the update (just checks and informs)
+
+Behavior:
+  - Reads installed version from ~/BASHRC/settings.json
+  - Downloads remote settings.json from GitHub raw URL
+  - Compares versions using year, month, day comparison
+  - If update available: shows version comparison and update instructions
+  - If up to date: informs user they're running latest version
+  - Returns error if BRC not installed or version fetch fails
+
+Version Comparison:
+  - Version format: 0.YYYY.MM.DD (e.g., 0.2025.11.15)
+  - Compares year, then month, then day
+  - Update available only if repository version is strictly newer
+
+Dependencies:
+  - curl (for downloading settings.json from remote)
+  - jq (for parsing JSON version information)
+
+Examples:
+  brcupdate               # Check for available updates
+
+Output when update available:
+  Update available!
+    Installed version: 0.2025.11.14 (2025-11-14)
+    Repository version: 0.2025.11.15 (2025-11-15)
+  
+  To update:
+    1. Navigate to your cloned BRC repository directory
+    2. Run: git pull
+    3. Run: ./___UPDATE.sh
+  
+  ⚠️  Important: Do NOT run ___UPDATE.sh from ~/BASHRC/
+     The update script must be run from your cloned git repository directory.
+
+Output when up to date:
+  You are running the latest version: 0.2025.11.15
+
+Note: This function only checks for updates and provides instructions.
+      It does not perform the actual update. To update, follow the
+      instructions provided and run ___UPDATE.sh from your cloned
+      git repository directory (not from ~/BASHRC/). Use brcversion()
+      to see your current installed version.
+EOF
+            return 0
+            ;;
         calc)
             cat <<EOF
 calc - Arithmetic Calculator
@@ -758,6 +846,8 @@ EOF
                 echo "Available base functions:"
                 echo "  backup        - Backup a single file"
                 echo "  backup_all    - Backup all files in current directory"
+                echo "  brcversion    - Show BRC version"
+                echo "  brcupdate     - Check for BRC updates"
                 echo "  calc          - Arithmetic calculator"
                 echo "  cd            - Change directory (enhanced)"
                 echo "  cdd           - Change directory and display contents"
@@ -790,6 +880,8 @@ Usage: brchelp base [FUNCTION]
 Available base functions:
   backup        - Backup a single file
   backup_all    - Backup all files in current directory
+  brcversion    - Show BRC version
+  brcupdate     - Check for BRC updates
   calc          - Arithmetic calculator
   cd            - Change directory (enhanced)
   cdd           - Change directory and display contents

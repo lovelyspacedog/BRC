@@ -63,6 +63,8 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `available` - List all available functions and plugins
 - `plugins` - List loaded plugins
 - `aliases` - List all aliases
+- `brcversion` - Show currently installed BRC version
+- `brcupdate` - Check if BRC update is available online
 
 ## Installation
 
@@ -206,6 +208,11 @@ motd print           # Show message of the day
 update               # System update helper
 cpuinfo              # CPU information
 backup <file>        # Backup a file
+
+# BRC Management
+brchelp <function>    # Show manual for a function
+brcversion           # Show installed BRC version
+brcupdate            # Check for available updates
 ```
 
 ## Optional Dependencies

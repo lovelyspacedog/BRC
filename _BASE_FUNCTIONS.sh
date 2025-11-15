@@ -9,6 +9,8 @@ source "$__BASICS_DIR/_DEPENDENCY_CHECK.sh"
 # INDEX:
 # - backup()
 # - backup_all()
+# - brcversion()
+# - brcupdate()
 # - calc()
 # - cdd()
 # - cd()
@@ -52,6 +54,133 @@ backup_all() {
         fi
     done
     return 0
+}
+
+# Show the version of BRC
+brcversion() {
+    if ! ensure_commands_present --caller "brcversion" jq; then
+        return 123
+    fi
+
+    local version
+    version=$(jq -r '.VERSION' "$HOME/BASHRC/settings.json")
+    echo "BRC version: $version"
+    return 0
+
+}
+
+# Check if a BRC update is available
+brcupdate() {
+    if ! ensure_commands_present --caller "brcupdate" curl jq; then
+        return 123
+    fi
+
+    local installed_settings="$HOME/BASHRC/settings.json"
+    local git_raw_base="https://raw.githubusercontent.com/lovelyspacedog/BRC"
+    local branch="main"
+    
+    # Check if installed
+    if [[ ! -f "$installed_settings" ]]; then
+        echo "Error: BRC is not installed (settings.json not found)" >&2
+        return 1
+    fi
+    
+    # Get installed version
+    local installed_version
+    installed_version=$(jq -r '.VERSION // empty' "$installed_settings" 2>/dev/null || echo "")
+    if [[ -z "$installed_version" ]]; then
+        echo "Error: Could not read VERSION from $installed_settings" >&2
+        return 1
+    fi
+    
+    # Get remote version
+    local remote_settings_url="$git_raw_base/$branch/settings.json"
+    local temp_settings
+    temp_settings=$(mktemp)
+    
+    if ! curl -sfL "$remote_settings_url" -o "$temp_settings" 2>/dev/null; then
+        echo "Error: Could not fetch remote version from repository" >&2
+        rm -f "$temp_settings"
+        return 1
+    fi
+    
+    local remote_version
+    remote_version=$(jq -r '.VERSION // empty' "$temp_settings" 2>/dev/null || echo "")
+    rm -f "$temp_settings"
+    
+    if [[ -z "$remote_version" ]]; then
+        echo "Error: Could not read VERSION from repository" >&2
+        return 1
+    fi
+    
+    # Parse version format: 0.YYYY.MM.DD
+    parse_version() {
+        local version="$1"
+        local cleaned="${version#0.}"
+        local year month day
+        year="${cleaned%%.*}"
+        local rest="${cleaned#*.}"
+        month="${rest%%.*}"
+        day="${rest#*.}"
+        
+        if [[ -n "$year" && -n "$month" && -n "$day" && "$year" != "$cleaned" && "$month" != "$rest" && "$day" != "$rest" ]]; then
+            printf "%s %s %s" "$year" "$month" "$day"
+        else
+            echo ""
+        fi
+    }
+    
+    # Parse versions
+    local old_ifs="$IFS"
+    local installed_parts remote_parts
+    IFS=' ' read -ra installed_parts <<< "$(parse_version "$installed_version")"
+    IFS=' ' read -ra remote_parts <<< "$(parse_version "$remote_version")"
+    IFS="$old_ifs"
+    
+    if [[ ${#installed_parts[@]} -ne 3 || ${#remote_parts[@]} -ne 3 ]]; then
+        echo "Error: Invalid version format. Installed: $installed_version, Remote: $remote_version" >&2
+        return 1
+    fi
+    
+    local installed_year=${installed_parts[0]}
+    local installed_month=${installed_parts[1]}
+    local installed_day=${installed_parts[2]}
+    
+    local remote_year=${remote_parts[0]}
+    local remote_month=${remote_parts[1]}
+    local remote_day=${remote_parts[2]}
+    
+    # Compare versions
+    local update_available=false
+    if [[ $remote_year -gt $installed_year ]]; then
+        update_available=true
+    elif [[ $remote_year -eq $installed_year ]]; then
+        if [[ $remote_month -gt $installed_month ]]; then
+            update_available=true
+        elif [[ $remote_month -eq $installed_month ]]; then
+            if [[ $remote_day -gt $installed_day ]]; then
+                update_available=true
+            fi
+        fi
+    fi
+    
+    if [[ "$update_available" == "true" ]]; then
+        echo "Update available!"
+        echo "  Installed version: $installed_version ($installed_year-$installed_month-$installed_day)"
+        echo "  Repository version: $remote_version ($remote_year-$remote_month-$remote_day)"
+        echo ""
+        echo "To update:"
+        echo "  1. Navigate to your cloned BRC repository directory"
+        echo "  2. Run: git pull"
+        echo "  3. Run: ./___UPDATE.sh"
+        echo ""
+        echo "⚠️  Important: Do NOT run ___UPDATE.sh from ~/BASHRC/"
+        echo "   The update script must be run from your cloned git repository directory."
+        return 0
+    else
+        echo "You are running the latest version: $installed_version"
+        return 0
+    fi
 }
 
 # Arithmetic helper with decimal support
