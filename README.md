@@ -12,7 +12,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - **Modular Architecture**: Organized into plugins, functions, and aliases
 - **Easy Installation**: Automated installer with backup and rollback support
 - **Configurable**: JSON-based settings for enabling/disabling features
-- **Safe Updates**: Timestamped backups of your `.bashrc` before any changes
+- **Safe Updates**: Automated update script with version checking and automatic backups
 - **Built-in Manual**: Comprehensive help system with `brchelp` command
 
 ### 🎨 Shell Enhancements
@@ -76,8 +76,8 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/lovelyspacedog/BRC.git BASHRC
-   cd BASHRC
+   git clone https://github.com/lovelyspacedog/BRC.git BRC
+   cd BRC
    ```
 
 2. Run the installer:
@@ -104,6 +104,48 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `~/BASHRC/` - Directory containing all scripts and plugins
 - `~/BASHRC/settings.json` - Configuration file
 - `~/.config/starship.toml` - Starship prompt config (if enabled)
+
+## Updating
+
+### Automatic Update
+
+The project includes an automated update script that compares your installed version with the repository version and offers to update if a newer version is available.
+
+**Important**: The update script must be run from the git repository directory (where you cloned the repo), **not** from `~/BASHRC`.
+
+1. Navigate to your cloned repository directory:
+   ```bash
+   cd /path/to/BRC
+   ```
+
+2. Run the update script:
+   ```bash
+   ./___UPDATE.sh
+   ```
+
+3. The script will:
+   - Check your installed version from `~/BASHRC/settings.json`
+   - Compare it with the repository version
+   - If an update is available, prompt for confirmation
+   - Create timestamped backups of `~/.bashrc` and `~/BASHRC`
+   - Run the installer to update your installation
+   - Compare backup files with the new installation to identify custom scripts you may need to port over
+
+4. After updating, check the backup directory for any custom files:
+   ```bash
+   ls ~/BASHRC.backup.*
+   ```
+   Port over any custom scripts you had in your old installation.
+
+### Manual Update
+
+If you prefer to update manually, simply run the installer again:
+```bash
+cd /path/to/BRC
+./___INSTALL.sh
+```
+
+This will create new backups and update your installation.
 
 ## Configuration
 
@@ -188,6 +230,7 @@ The installer will check for these and warn about missing optional dependencies.
 ```
 BASHRC/
 ├── ___INSTALL.sh          # Main installer script
+├── ___UPDATE.sh           # Automated update script
 ├── .bashrc.copyToHome     # Template .bashrc file
 ├── settings.json          # Default settings
 ├── _PREAMBLE.sh           # User customization file (safe to edit)
