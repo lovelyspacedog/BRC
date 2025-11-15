@@ -1,6 +1,6 @@
 #!/bin/bash
 CURRENT_VERSION="0.2025.11.15" 
-COPYRIGHT=true
+COPYRIGHT="${COPYRIGHT:-true}"
 msg="Made by Tony Pup (c) 2025. All rights reserved.    Rarf~~! <3"
 
 ! ! ! ! ! $COPYRIGHT || {
