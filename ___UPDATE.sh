@@ -288,6 +288,14 @@ if [[ "$update_needed" == "true" ]]; then
       exit 32
     fi
     log_success "Backup saved to $backup_dir"
+    
+    # Delete the original directory to prevent interference with installer
+    log_detail "Removing ~/BASHRC directory to allow clean installation"
+    if ! rm -rf "$INSTALLED_DIR"; then
+      log_error "Failed to remove ~/BASHRC directory. Update halted."
+      exit 33
+    fi
+    log_success "Removed ~/BASHRC directory"
   else
     log_warn "~/BASHRC directory not found. Skipping backup."
   fi
@@ -302,7 +310,8 @@ if [[ "$update_needed" == "true" ]]; then
   fi
   
   log_detail "Executing ___INSTALL.sh..."
-  if bash "$script_dir/___INSTALL.sh"; then
+  log_detail "Auto-answering 'y' to all installation prompts..."
+  if yes | bash "$script_dir/___INSTALL.sh"; then
     log_success "Installation completed successfully!"
     printf "\n"
     
