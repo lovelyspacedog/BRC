@@ -1213,6 +1213,7 @@ Update Process:
   3. Comparison: Compares versions to determine if update is available
   4. Backup: Creates timestamped backups of ~/.bashrc and ~/BASHRC directory
   5. Installation: Runs ___INSTALL.sh from the git repository directory
+  6. Backup File Check: Compares files in backup with current installation to identify custom scripts
 
 Safety Features:
   - Interactive confirmation required before updating
@@ -1222,6 +1223,7 @@ Safety Features:
   - Verifies git repository status before proceeding
   - Provides detailed logging of each step
   - Shows rollback instructions after successful update
+  - Identifies custom files in backup that need to be ported over
 
 Version Comparison:
   - Version format: 0.YYYY.MM.DD (e.g., 0.2025.11.15)
@@ -1243,6 +1245,9 @@ Behavior:
   - Prompts user before proceeding with update
   - Shows clear version comparison information
   - Runs ___INSTALL.sh after successful backups
+  - After installation, compares backup files with current installation
+  - Displays list of files in backup that aren't in current installation
+  - Warns user to check backup directory for custom scripts to port over
 
 Dependencies:
   - curl (for downloading settings.json from remote)
@@ -1271,7 +1276,11 @@ Note: This script checks for updates by comparing the VERSION field in settings.
       from your installed BASHRC with the version in the git repository. It must be
       run from the git repository directory (where you cloned the repo), not from
       ~/BASHRC. The script will automatically backup your configuration before
-      updating, and provides instructions for rollback if needed.
+      updating, and provides instructions for rollback if needed. After a successful
+      update, the script automatically compares files in the backup directory with
+      the new installation and displays any custom files that were in your old
+      installation but aren't in the new one, helping you identify scripts you may
+      need to port over manually.
 EOF
                 return 0
                 ;;
