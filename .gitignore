@@ -1,5 +1,9 @@
 .bashrc_symlink.sh
 .bashrc
 _PREAMBLE.sh
+_PLUGINS.sh
+_ALIASES.sh
 FUNCTION_ORGANIZATION.md
+_check_templates.sh
+user-scripts
 

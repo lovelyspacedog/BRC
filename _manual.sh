@@ -1002,6 +1002,7 @@ Description:
   - Maintains a list of available plugins
   - Provides error handling for missing plugins
   - Displays loaded plugins when run directly
+  - Generated from a template in ___INSTALL.sh during installation
 
 Loaded Plugins:
   - _BASE_FUNCTIONS.sh  - Basic/Core helper functions
@@ -1021,12 +1022,21 @@ Loaded Plugins:
   - weather.sh          - Display current weather information
   - timer.sh            - Set and monitor simple named timers
   - available.sh        - List available plugins and their status
+  - user-scripts/*.sh   - User custom scripts (loaded automatically)
+
+User Scripts Directory:
+  - The user-scripts/ directory is automatically created by ___INSTALL.sh
+  - Any .sh files in ~/BASHRC/user-scripts/ are automatically sourced
+  - Example template (example.sh) is created during installation
+  - Add your own custom scripts to this directory for automatic loading
+  - Scripts are loaded in alphabetical order
 
 Behavior:
   - When sourced: loads all plugins in the order listed
   - When run directly: displays list of all loaded plugins
   - Warns if a plugin file is missing (but continues loading others)
   - Plugins are sourced from the same directory as _PLUGINS.sh
+  - User scripts from user-scripts/*.sh are loaded automatically
 
 Dependencies:
   - _DEPENDENCY_CHECK.sh (sourced automatically)
@@ -1035,9 +1045,12 @@ Examples:
   source _PLUGINS.sh    # Load all plugins (typical usage)
   _PLUGINS.sh           # Display list of loaded plugins
 
-Note: This file is typically sourced automatically by .bashrc. It manages
-      the loading of all BRC plugin scripts in the correct order. Plugins
-      are loaded from the BASHRC directory.
+Note: This file is generated automatically by ___INSTALL.sh from a template
+      if it doesn't exist. It is typically sourced automatically by .bashrc.
+      It manages the loading of all BRC plugin scripts in the correct order.
+      Plugins are loaded from the BASHRC directory. The user-scripts/
+      directory allows you to add custom scripts that will be automatically
+      loaded without modifying the core _PLUGINS.sh file.
 EOF
                 return 0
                 ;;
@@ -1121,9 +1134,12 @@ Examples:
   _ALIASES.sh           # Display all aliases
   aliases               # Display all aliases (using alias)
 
-Note: This file is typically sourced automatically by .bashrc via _PLUGINS.sh.
-      You can also use "bashrc alias" to view aliases. Conditional aliases
-      (eza, nvim) are only defined if those tools are installed.
+Note: This file is generated automatically by ___INSTALL.sh from a template
+      if it doesn't exist. It is typically sourced automatically by .bashrc
+      via _PLUGINS.sh. You can also use "bashrc alias" to view aliases.
+      Conditional aliases (eza, nvim) are only defined if those tools are
+      installed. Since this file is generated from a template, any manual
+      edits will be preserved across updates unless the file is deleted.
 EOF
                 return 0
                 ;;
@@ -1147,9 +1163,12 @@ Installation Steps:
   1. Backup: Creates timestamped backup of ~/.bashrc in ~/.bashrc.backup/
   2. Install: Copies .bashrc.copyToHome to ~/.bashrc
   3. Scripts: Creates ~/BASHRC directory and copies all *.sh files
-  4. Preamble: Generates _PREAMBLE.sh template if it doesn't exist
-  5. Settings: Initializes settings.json with default configuration
-  6. Welcome: Creates motd.txt with installation success message
+  4. User Scripts: Creates ~/BASHRC/user-scripts/ directory with example.sh template
+  5. Plugins: Generates _PLUGINS.sh from template in ___INSTALL.sh if it doesn't exist
+  6. Aliases: Generates _ALIASES.sh from template in ___INSTALL.sh if it doesn't exist
+  7. Preamble: Generates _PREAMBLE.sh template if it doesn't exist
+  8. Settings: Initializes settings.json with default configuration
+  9. Welcome: Creates motd.txt with installation success message
 
 Safety Features:
   - Interactive confirmation required before installation
@@ -1162,6 +1181,10 @@ Files Created/Modified:
   - ~/.bashrc - Replaced with new configuration
   - ~/.bashrc.backup/YYYYMMDDHHMMSS.bashrc - Timestamped backup
   - ~/BASHRC/ - Directory containing all shell scripts
+  - ~/BASHRC/user-scripts/ - Directory for user custom scripts (created if missing)
+  - ~/BASHRC/user-scripts/example.sh - Example template script (created if missing)
+  - ~/BASHRC/_PLUGINS.sh - Generated from template in ___INSTALL.sh (if it doesn't exist)
+  - ~/BASHRC/_ALIASES.sh - Generated from template in ___INSTALL.sh (if it doesn't exist)
   - ~/BASHRC/_PREAMBLE.sh - Generated template (if it doesn't exist)
   - ~/BASHRC/settings.json - Configuration file
   - ~/motd.txt - Welcome message

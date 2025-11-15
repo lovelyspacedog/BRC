@@ -35,7 +35,9 @@ pause()       { sleep 0.5; }
 #  20-29 - .bashrc deployment errors
 #  30-39 - BASHRC directory errors
 #  40-49 - Script copy errors
-#  50-59 - Configuration/settings errors
+#  50-51 - Configuration/settings errors
+#  52   - _PLUGINS.sh critical file missing/failed to create
+#  53   - _ALIASES.sh critical file missing/failed to create
 
 # Let's keep things tidy; this could be someone else's computer after all.
 set -euo pipefail
@@ -408,7 +410,7 @@ pause
 log_step "Scripts" "Preparing ~/BASHRC directory"
 pause
 if [[ -d "$bashrc_dir" ]]; then
-  log_warn "$bashrc_dir already exists; reusing it and preserving existing files."
+  log_warn "$bashrc_dir already exists; matching .sh files will be overwritten, others preserved."
   preexisting_bashrc_dir=true
   printf "Continue with installation using existing contents? (y/N): "
   read -t 15 -n 1 -r reuse_ans || reuse_ans="m"
@@ -473,6 +475,41 @@ else
 fi
 shopt -u nullglob
 
+# Create user-scripts directory if it doesn't exist
+log_detail "Checking user-scripts directory"
+pause
+user_scripts_dir="$bashrc_dir/user-scripts"
+if [[ ! -d "$user_scripts_dir" ]]; then
+  log_detail "Creating user-scripts directory"
+  if ! mkdir -p "$user_scripts_dir"; then
+    log_warn "Failed to create user-scripts directory. Installation will continue."
+  else
+    log_success "user-scripts directory created in $HOME/BASHRC"
+    # If directory was just created, generate example.sh template
+    example_file="$user_scripts_dir/example.sh"
+    log_detail "Creating example.sh template"
+    if ! cat <<'EXAMPLE_EOF' > "$example_file"; then
+#!/usr/bin/env bash
+# This is an example script for the BASHRC project.
+# Save your user created scripts in this directory so they aren't overwritten by updates.
+
+# Return here since this is a test script.
+return 0
+
+example() {
+    echo "Example..."
+}
+EXAMPLE_EOF
+      log_warn "Failed to create example.sh template. Installation will continue."
+    else
+      log_success "example.sh template created in user-scripts directory"
+    fi
+    pause
+  fi
+else
+  log_detail "user-scripts directory already exists, skipping creation"
+fi
+
 # Create _PREAMBLE.sh if it doesn't exist (user-customizable file)
 log_detail "Checking _PREAMBLE.sh configuration"
 pause
@@ -512,6 +549,231 @@ PREAMBLE_EOF
   pause
 else
   log_detail "_PREAMBLE.sh already exists, skipping creation"
+fi
+
+# Create _PLUGINS.sh if it doesn't exist (user-customizable file)
+log_detail "Checking _PLUGINS.sh configuration"
+pause
+plugins_file="$bashrc_dir/_PLUGINS.sh"
+if [[ ! -f "$plugins_file" ]]; then
+  log_detail "Creating _PLUGINS.sh template"
+  if ! cat <<'PLUGINS_EOF' > "$plugins_file"; then
+#!/usr/bin/env bash
+
+readonly __PLUGINS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$__PLUGINS_DIR/_DEPENDENCY_CHECK.sh"
+
+declare -a plugins=(
+    "_BASE_FUNCTIONS.sh"   # Basic/Core helper functions
+    "analyze-file.sh"      # Inspect file contents and metadata quickly
+    "bashrc.sh"            # Load primary bash configuration helpers
+    "cmd-not-found.sh"     # Command-not-found handler with yay/flatpak search
+    "dl-paper.sh"          # Download wallpapers from YouTube
+    "dots.sh"              # Manage dotfile shortcuts and navigation
+    "extract-compress.sh"  # Extract and compress files
+    "fastnote.sh"          # Append quick notes to the fastnote scratchpad
+    "motd.sh"              # Show message-of-the-day style summaries
+    "navto.sh"             # Jump to bookmarked filesystem locations
+    "open.sh"              # Open a file with the default application
+    "pokefetch.sh"         # Fetch random Pokémon data from the API
+    "prepsh.sh"            # Prepare shell session with common setup
+    "slashback.sh"         # Restore previous directories using slash shortcuts
+    "weather.sh"           # Display current weather information
+    "timer.sh"             # Set and monitor simple named timers
+    "available.sh"         # List available plugins and their status
+    "user-scripts/*.sh"    # User custom scripts
+)
+
+for plugin in "${plugins[@]}"; do
+    if [[ "$plugin" == *"/*"* ]]; then
+        # Handle wildcard patterns (e.g., user-scripts/*.sh)
+        for file in "$__PLUGINS_DIR"/$plugin; do
+            if [[ -f "$file" ]]; then
+                source "$file"
+            fi
+        done
+    elif [[ -f "$__PLUGINS_DIR/$plugin" ]]; then
+        source "$__PLUGINS_DIR/$plugin"
+    else
+        echo "Warning: $plugin not found" >&2
+    fi
+done
+
+# Display loaded plugins when run directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "Loaded plugins:"
+    for plugin in "${plugins[@]}"; do
+        if [[ "$plugin" == *"/*"* ]]; then
+            # Handle wildcard patterns
+            for file in "$__PLUGINS_DIR"/$plugin; do
+                if [[ -f "$file" ]]; then
+                    echo "  $(basename "$file")"
+                fi
+            done
+        else
+            echo "  $plugin"
+        fi
+    done
+fi
+PLUGINS_EOF
+    log_error "Failed to create _PLUGINS.sh. Installation will be reverted."
+    pause
+    log_detail "Removing files copied during this install"
+    for target in "${copied_targets[@]}"; do
+      rm -f "$target" 2>/dev/null || true
+    done
+    cleanup_bashrc_dir_if_empty
+    log_detail "Reverting ~/.bashrc to previous version"
+    if ! cp ~/.bashrc.backup/$saved_timestamp.bashrc ~/.bashrc; then
+      log_error "Failed to revert ~/.bashrc automatically. Please revert manually."
+      exit 52
+    fi
+    log_success "Original ~/.bashrc restored"
+    exit 52
+  else
+    log_success "_PLUGINS.sh created in $HOME/BASHRC"
+  fi
+  pause
+else
+  log_detail "_PLUGINS.sh already exists, skipping creation"
+fi
+
+# Verify _PLUGINS.sh exists (critical file)
+if [[ ! -f "$plugins_file" ]]; then
+  log_error "_PLUGINS.sh is missing and could not be created. Installation will be reverted."
+  pause
+  log_detail "Removing files copied during this install"
+  for target in "${copied_targets[@]}"; do
+    rm -f "$target" 2>/dev/null || true
+  done
+  cleanup_bashrc_dir_if_empty
+  log_detail "Reverting ~/.bashrc to previous version"
+  if ! cp ~/.bashrc.backup/$saved_timestamp.bashrc ~/.bashrc; then
+    log_error "Failed to revert ~/.bashrc automatically. Please revert manually."
+    exit 52
+  fi
+  log_success "Original ~/.bashrc restored"
+  exit 52
+fi
+
+# Create _ALIASES.sh if it doesn't exist (user-customizable file)
+log_detail "Checking _ALIASES.sh configuration"
+pause
+aliases_file="$bashrc_dir/_ALIASES.sh"
+if [[ ! -f "$aliases_file" ]]; then
+  log_detail "Creating _ALIASES.sh template"
+  if ! cat <<'ALIASES_EOF' > "$aliases_file"; then
+# Aliases
+alias ++="cpx"
+alias analyze="analyze-file"
+alias brb="/usr/bin/systemctl reboot"
+alias c="clear"
+alias clss="clear && pokefetch"
+alias cls="clear"
+alias copy="rsync -rv --progress"
+alias cx="chmod +x"
+alias duu="find -maxdepth 1 -mindepth 1 -exec du -skh {} \;" # Get the size of the current directory
+alias exelog="$HOME/.config/userScripts/logExplorer.sh"
+alias fzf="fzf --preview 'bat --style=numbers --color=always {}'"
+alias gg="update"
+alias grep="grep --color=auto"
+alias hardware="inxi -Fza"
+alias hyperctl="hyprctl"
+alias hyperpm="hyprpm"
+alias mc="mc --nosubshell"
+alias media="cd /run/media/$USER"
+alias media-cd="media && cd"
+alias mu="rmpc"
+alias music="rmpc"
+alias myip="curl ipinfo.io/ip ; echo"
+alias nuke="pkill -9"
+alias please="sudo"
+alias plugins="$HOME/BASHRC/_PLUGINS.sh"
+alias aliases="$HOME/BASHRC/_ALIASES.sh"
+alias pls="sudo"
+alias ports="netstat -tulanp"
+alias s="sudo"
+alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -'
+alias ssh1="ssh tonypup@expedition.whatbox.ca"
+alias tg="update"
+alias tt="tmux"
+alias uninst="yay -Rnsc" # Uninstall a package
+alias us="dots userScripts"
+alias x="exit"
+alias xcx="chmod -x"
+alias yayr="yay -Rnsc"   # Remove a package
+alias zzz="/usr/bin/systemctl poweroff"
+
+#Root Aliases
+[[ $UID -eq 0 ]] && {
+  alias rm="rm -i" # Ask for confirmation before removing
+  alias cp="cp -i" # Ask for confirmation before copying
+  alias mv="mv -i" # Ask for confirmation before moving
+}
+
+#LS/EZA Aliases
+command -v eza >/dev/null 2>&1 && {
+  alias ls="eza -lh --group-directories-first --icons=auto"
+  alias lsa="eza -a"
+  alias lt="eza --tree --level=2 --long --icons --git"
+  alias lta="lt -a"
+  alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+}
+
+# Neovim Aliases
+command -v nvim >/dev/null 2>&1 && {
+  alias vi="nvim"
+  alias vim="nvim"
+  alias svi="sudo nvim"
+  alias svim="sudo nvim"
+  alias edit="nvim"
+  alias hardware="inxi -Fza | nvim"
+}
+
+# If loaded directly, display aliases and exit
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    cat "$HOME/BASHRC/_ALIASES.sh"
+    exit $?
+fi
+ALIASES_EOF
+    log_error "Failed to create _ALIASES.sh. Installation will be reverted."
+    pause
+    log_detail "Removing files copied during this install"
+    for target in "${copied_targets[@]}"; do
+      rm -f "$target" 2>/dev/null || true
+    done
+    cleanup_bashrc_dir_if_empty
+    log_detail "Reverting ~/.bashrc to previous version"
+    if ! cp ~/.bashrc.backup/$saved_timestamp.bashrc ~/.bashrc; then
+      log_error "Failed to revert ~/.bashrc automatically. Please revert manually."
+      exit 53
+    fi
+    log_success "Original ~/.bashrc restored"
+    exit 53
+  else
+    log_success "_ALIASES.sh created in $HOME/BASHRC"
+  fi
+  pause
+else
+  log_detail "_ALIASES.sh already exists, skipping creation"
+fi
+
+# Verify _ALIASES.sh exists (critical file)
+if [[ ! -f "$aliases_file" ]]; then
+  log_error "_ALIASES.sh is missing and could not be created. Installation will be reverted."
+  pause
+  log_detail "Removing files copied during this install"
+  for target in "${copied_targets[@]}"; do
+    rm -f "$target" 2>/dev/null || true
+  done
+  cleanup_bashrc_dir_if_empty
+  log_detail "Reverting ~/.bashrc to previous version"
+  if ! cp ~/.bashrc.backup/$saved_timestamp.bashrc ~/.bashrc; then
+    log_error "Failed to revert ~/.bashrc automatically. Please revert manually."
+    exit 53
+  fi
+  log_success "Original ~/.bashrc restored"
+  exit 53
 fi
 
 # Check if starship is enabled and create config if needed
