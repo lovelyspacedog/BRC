@@ -1190,6 +1190,91 @@ Note: This script must be run from outside the ~/BASHRC directory. It will
 EOF
                 return 0
                 ;;
+            ___UPDATE|UPDATE|update|_UPDATE)
+                cat <<EOF
+___UPDATE.sh - BRC Update Script
+
+Automated update script that compares installed version with git repository version
+and offers to update if a newer version is available.
+
+Usage: bash ___UPDATE.sh
+
+Description:
+  - Compares version number from ~/BASHRC/settings.json with git repository version
+  - Downloads settings.json from the remote git repository
+  - Parses version format (0.YYYY.MM.DD) and compares year, month, and day
+  - Offers to update if repository version is newer
+  - Performs safe update with automatic backups
+  - Runs installer from the git repository directory
+
+Update Process:
+  1. Version Check: Reads installed version from ~/BASHRC/settings.json
+  2. Repository Check: Downloads settings.json from git repository (or uses local)
+  3. Comparison: Compares versions to determine if update is available
+  4. Backup: Creates timestamped backups of ~/.bashrc and ~/BASHRC directory
+  5. Installation: Runs ___INSTALL.sh from the git repository directory
+
+Safety Features:
+  - Interactive confirmation required before updating
+  - Automatic backup of ~/.bashrc to ~/.bashrc.backup/
+  - Automatic backup of ~/BASHRC to ~/BASHRC.backup.TIMESTAMP
+  - Cannot be run from ~/BASHRC directory (must run from git repository)
+  - Verifies git repository status before proceeding
+  - Provides detailed logging of each step
+  - Shows rollback instructions after successful update
+
+Version Comparison:
+  - Version format: 0.YYYY.MM.DD (e.g., 0.2025.11.15)
+  - Compares year, then month, then day
+  - Update offered only if repository version is strictly newer
+  - If versions match or installed is newer, no update is offered
+
+Files Created/Modified:
+  - ~/.bashrc.backup/YYYYMMDDHHMMSS.bashrc - Timestamped .bashrc backup
+  - ~/BASHRC.backup.TIMESTAMP/ - Timestamped BASHRC directory backup
+  - All files installed by ___INSTALL.sh during update
+
+Behavior:
+  - Must be run from the git repository directory (not from ~/BASHRC)
+  - Checks if current directory is a git repository
+  - Attempts to fetch latest from remote repository
+  - Falls back to local git checkout if remote fetch fails
+  - Downloads settings.json from raw GitHub URL or uses local file
+  - Prompts user before proceeding with update
+  - Shows clear version comparison information
+  - Runs ___INSTALL.sh after successful backups
+
+Dependencies:
+  - curl (for downloading settings.json from remote)
+  - jq (for parsing JSON version information)
+  - git (for repository operations)
+  - date (for timestamp generation)
+  - bash (for script execution)
+  - ___INSTALL.sh (runs automatically during update)
+
+Examples:
+  bash ___UPDATE.sh        # Check for updates and install if available
+
+Prerequisites:
+  - Must be run from the directory where you cloned the BASHRC repository
+  - Cannot be run from ~/BASHRC directory
+  - Current directory must be a git repository
+  - BASHRC must already be installed (for version comparison)
+
+Rollback:
+  If you need to revert after an update:
+    cp ~/.bashrc.backup/YYYYMMDDHHMMSS.bashrc ~/.bashrc
+    rm -rf ~/BASHRC && mv ~/BASHRC.backup.TIMESTAMP ~/BASHRC
+    source ~/.bashrc
+
+Note: This script checks for updates by comparing the VERSION field in settings.json
+      from your installed BASHRC with the version in the git repository. It must be
+      run from the git repository directory (where you cloned the repo), not from
+      ~/BASHRC. The script will automatically backup your configuration before
+      updating, and provides instructions for rollback if needed.
+EOF
+                return 0
+                ;;
             bash-completion|bash_completion|bashcompletion)
                 cat <<EOF
 bash-completion - Enhanced Tab Completion System
@@ -1646,6 +1731,7 @@ Show the manual for a specific function
 
 Available functions:
   ___INSTALL      - BRC installation script
+  ___UPDATE       - BRC update script
   _ALIASES        - Shell alias definitions
   _PLUGINS        - Plugin loader system
   _PREAMBLE       - User customization file
