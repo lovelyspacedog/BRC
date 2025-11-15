@@ -311,7 +311,14 @@ if [[ "$update_needed" == "true" ]]; then
   
   log_detail "Executing ___INSTALL.sh..."
   log_detail "Auto-answering 'y' to all installation prompts..."
-  if yes | bash "$script_dir/___INSTALL.sh"; then
+  # Provide "y" answers to installer prompts (2 prompts: initial install + reuse existing BASHRC)
+  # Use printf instead of yes to avoid exit code issues with pipes
+  # Temporarily disable set -e to properly capture exit code
+  set +e
+  printf "y\ny\n" | bash "$script_dir/___INSTALL.sh"
+  install_exit=$?
+  set -e
+  if [[ $install_exit -eq 0 ]]; then
     log_success "Installation completed successfully!"
     printf "\n"
     
