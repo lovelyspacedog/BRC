@@ -1,4 +1,5 @@
 {
+  "VERSION": "0.2025.11.15",
   "enable_blesh": true,
   "enable_shellmommy": true,
   "enable_wlcopy": true,

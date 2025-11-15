@@ -1,4 +1,5 @@
 #!/bin/bash
+CURRENT_VERSION="0.2025.11.15" 
 COPYRIGHT=true
 msg="Made by Tony Pup (c) 2025. All rights reserved.    Rarf~~! <3"
 
@@ -548,8 +549,9 @@ STARSHIP_EOF
 fi
 
 log_detail "Initializing settings.json in $HOME/BASHRC"
-if ! cat <<'EOF' > "$bashrc_dir/settings.json"; then
+if ! cat <<EOF > "$bashrc_dir/settings.json"; then
 {
+  "VERSION": "$CURRENT_VERSION",
   "enable_automotd": true,
   "enable_blesh": true,
   "enable_manual": true,
@@ -583,6 +585,7 @@ motd_timestamp="$(date +"%Y-%m-%d %H:%M:%S %Z")"
 log_detail "Creating first run message in $HOME/motd.txt"
 if ! cat <<EOF > "$HOME/motd.txt"; then
 Installation was successful at ${motd_timestamp} !
+Version: $CURRENT_VERSION
 
 Type brchelp to show the manual for a specific function.
 Type available to list all functions available after sourcing ~/.bashrc.
