@@ -167,25 +167,39 @@ log_success "Repository version: $remote_version"
 log_step "Version Comparison" "Comparing versions"
 pause
 
+# Parse version format: 0.YYYY.MM.DD
+# Remove leading "0." and split into year, month, day
 parse_version() {
   local version="$1"
-  # Remove leading "0." if present, then split by dots
   local cleaned="${version#0.}"
-  IFS='.' read -ra parts <<< "$cleaned"
-  if [[ ${#parts[@]} -eq 3 ]]; then
-    printf "%s %s %s" "${parts[0]}" "${parts[1]}" "${parts[2]}"
+  
+  # Split by '.' using parameter expansion (more reliable than read in subshells)
+  local year month day
+  year="${cleaned%%.*}"
+  local rest="${cleaned#*.}"
+  month="${rest%%.*}"
+  day="${rest#*.}"
+  
+  # Validate we got exactly 3 parts
+  if [[ -n "$year" && -n "$month" && -n "$day" && "$year" != "$cleaned" && "$month" != "$rest" && "$day" != "$rest" ]]; then
+    printf "%s %s %s" "$year" "$month" "$day"
   else
     echo ""
   fi
 }
 
-installed_parts=($(parse_version "$installed_version"))
-remote_parts=($(parse_version "$remote_version"))
+# Parse versions into arrays
+old_ifs="$IFS"
+IFS=' ' read -ra installed_parts <<< "$(parse_version "$installed_version")"
+IFS=' ' read -ra remote_parts <<< "$(parse_version "$remote_version")"
+IFS="$old_ifs"
 
 if [[ ${#installed_parts[@]} -ne 3 || ${#remote_parts[@]} -ne 3 ]]; then
   log_error "Invalid version format. Expected format: 0.YYYY.MM.DD"
   log_detail "Installed: $installed_version"
   log_detail "Remote: $remote_version"
+  log_detail "Parsed installed parts: ${installed_parts[*]} (count: ${#installed_parts[@]})"
+  log_detail "Parsed remote parts: ${remote_parts[*]} (count: ${#remote_parts[@]})"
   exit 12
 fi
 
