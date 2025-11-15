@@ -2,21 +2,6 @@
 
 # List all bash functions currently defined in this shell, assuming
 # ~/.bashrc (and its sourced modules) have already run.
-show_help() {
-  cat <<EOF
-Usage: available [OPTIONS]
-
-List all bash functions currently defined in this shell.
-
-OPTIONS:
-  --all, -a        Show all functions (including those starting with underscore)
-  --hold, -h       Same as --all (show all functions)
-  --help           Show this help message and exit
-
-By default, functions starting with an underscore are filtered out.
-EOF
-}
-
 determine_mode() {
   local warn_mode="$1"
   shift || true
@@ -98,24 +83,12 @@ print_functions() {
 }
 
 available() {
-  for arg in "$@"; do
-    if [[ "$arg" == --help ]]; then
-      show_help
-      return 0
-    fi
-  done
   print_functions "$@"
 }
 
 # If run directly, source ~/.bashrc in an interactive subshell first so
 # that all functions are loaded before listing them.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  for arg in "$@"; do
-    if [[ "$arg" == --help ]]; then
-      show_help
-      exit 0
-    fi
-  done
   mode=$(determine_mode warn "$@")
   mapfile -t raw_funcs < <(bash --noprofile -ic 'compgen -A function | sort' 2>/dev/null)
   funcs=()
