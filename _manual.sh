@@ -668,63 +668,57 @@ EOF
                 ;;
             navto)
                 cat <<EOF
-navto - Quick Navigation to Common Directories
+navto - JSON-Driven Quick Navigation
 
-Navigate to common directories using short aliases.
+Navigate to destinations defined in navto.json using short keys; shows a formatted listing on arrival.
 
-Usage: navto <destination>
+Usage:
+  navto                    # Show help and list available destinations
+  navto <KEY>              # Navigate to destination by key
+  navto --remove <KEY>     # Remove destination by key (alias: -r, --delete, -d)
 
 Description:
-  - Provides quick shortcuts to navigate to common directories
-  - Changes directory and lists contents after navigation
-  - Supports multiple aliases for the same destination
-  - Commands are case-insensitive
+  - Reads destinations from ~/BASHRC/navto.json (KEY -> {name, path})
+  - Lists available destinations with styled output when run without args
+  - Navigates to the selected path, expands \$HOME, and lists directory contents
+  - Keys are matched case-insensitively (converted to uppercase)
+  - Interactive flows:
+      - Add missing key: prompts for display name and path (validates JSON-safe name and existing path)
+      - Remove key: supports manual removal and stale-path removal (single confirmation)
+  - Template generation:
+      - If navto.json is missing, offers to create a starter template with common Linux directories
+  - Styled output:
+      - Uses ANSI colors/icons for headings and listings; falls back gracefully
 
-Available Destinations:
-  X, HOME          - Home directory
-  P, PICS, PICTURES - Pictures directory
-  V, VID, VIDEOS   - Videos directory
-  M, MUSIC         - Music directory
-  D, DOCS, DOCUMENTS - Documents directory
-  L, DOWN, DOWNLOADS - Downloads directory
-  W, WALL, WALLPAPERS - Wallpapers directory
-  ., CONFIG, CFG   - .config directory
-  H, HYPR, HYPRLAND - Hyprland config directory
-  S, SCRIPTS, HYPRSCRIPTS - Hyprland scripts directory
-  WB, WAYBAR       - Waybar config directory
-  U, USR, SYSTEM   - System applications (/usr/share/applications)
-  U2, USER, LOCAL  - User applications (~/.local/share/applications)
-  U3, LOCAL        - Local applications (/usr/local/share/applications)
-  B, SSH, EXPEDITION - SSH to expedition server
-  C, CODE, PROJECTS - Code/Projects directory
-  T, TEMPLATES     - Templates directory
-  R, RECENT        - Recent downloads (shows last 5 files)
+File:
+  ~/BASHRC/navto.json
+  {
+    "X":  { "name": "Home",      "path": "\$HOME" },
+    "D":  { "name": "Documents", "path": "\$HOME/Documents" },
+    "P":  { "name": "Pictures",  "path": "\$HOME/Pictures" }
+    ...
+  }
 
-Behavior:
-  - Changes to the specified directory
-  - Displays current directory path
-  - Lists directory contents (uses eza if available, otherwise ls)
-  - Special case: "R" shows recent downloads without changing directory
-  - Special case: "B" initiates SSH connection instead of changing directory
-  - Commands are case-insensitive
+Options:
+  --remove, -r, --delete, -d   Remove a destination by key (asks for confirmation)
+
+Behaviors and Safeguards:
+  - Missing navto.json: offers to generate a generic template (common Linux dirs)
+  - Missing key: offers to add new entry; validates name (JSON-safe) and path exists
+  - Stale path: if configured path no longer exists, offers single-confirm removal
+  - Normalizes '~' to '\$HOME' when adding entries
+  - Atomic JSON writes using jq to prevent corruption
 
 Dependencies:
-  - cd, pwd, ls (for navigation and listing)
-  - eza (optional, for enhanced listing with icons)
-  - ssh (for SSH connection)
-  - head (for recent downloads)
+  - jq (for reading/updating navto.json)
+  - eza (optional, for enhanced directory listing; falls back to ls)
 
 Examples:
-  navto X           # Navigate to home directory
-  navto pics        # Navigate to Pictures (case-insensitive)
-  navto .           # Navigate to .config
-  navto hypr        # Navigate to Hyprland config
-  navto recent      # Show recent downloads
-  navto ssh         # SSH to expedition server
-
-Note: All destination aliases are case-insensitive. The function will list
-      directory contents after successful navigation. Some destinations have
-      fallback paths (e.g., Code/Projects tries multiple locations).
+  navto               # Show styled list of available destinations
+  navto X             # Go to Home
+  navto d             # Case-insensitive: go to Documents
+  navto --remove P    # Remove the Pictures destination
+  navto R             # If R's path is missing, offers to remove the stale entry
 EOF
                 return 0
                 ;;
