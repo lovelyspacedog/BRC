@@ -55,7 +55,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `pokefetch` - Fetch random Pokémon data
 - `timer` - Set and monitor simple named timers
 - `fastnote` - Quick note-taking to scratchpad
-- `motd` - Message-of-the-day display
+- `motd` - Message-of-the-day display (supports stdin for `make`)
 - `dl-paper` - Download wallpapers from YouTube
 - `cmd-not-found` - Enhanced command-not-found handler
   - Press any key during search to cancel immediately
@@ -227,6 +227,7 @@ weather              # Show weather
 timer <name> <sec>   # Set a timer
 pokefetch            # Show random Pokémon
 motd print           # Show message of the day
+echo "Hello world" | motd make   # Create/overwrite ~/motd.txt from stdin
 
 # System
 update               # System update helper
