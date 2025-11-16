@@ -75,6 +75,19 @@ brcupdate() {
         return 123
     fi
 
+    # Parse arguments for silent flag
+    local silent=false
+    for arg in "$@"; do
+        case "$arg" in
+            --silent|-s)
+                silent=true
+                ;;
+            *)
+                # Ignore unknown arguments
+                ;;
+        esac
+    done
+
     local installed_settings="$HOME/BASHRC/settings.json"
     local git_raw_base="https://raw.githubusercontent.com/lovelyspacedog/BRC"
     local branch="main"
@@ -178,7 +191,9 @@ brcupdate() {
         echo "   The update script must be run from your cloned git repository directory."
         return 0
     else
-        echo "You are running the latest version: $installed_version"
+        if [[ "$silent" != "true" ]]; then
+            echo "You are running the latest version: $installed_version"
+        fi
         return 0
     fi
 }

@@ -855,6 +855,7 @@ log_detail "Initializing settings.json in $HOME/BASHRC"
 if ! cat <<EOF > "$bashrc_dir/settings.json"; then
 {
   "VERSION": "$CURRENT_VERSION",
+  "check_for_updates": true,
   "enable_automotd": true,
   "enable_blesh": true,
   "enable_manual": true,

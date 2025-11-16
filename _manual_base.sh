@@ -111,7 +111,12 @@ brcupdate - Check for BRC Updates
 
 Check if a newer version of BRC is available in the repository.
 
-Usage: brcupdate
+Usage: brcupdate [--silent|-s]
+
+Options:
+  --silent, -s    Suppress output when no update is available
+                  Update messages still display when an update is found
+                  Useful for background checks in scripts
 
 Description:
   - Compares installed version with the repository version online
@@ -124,9 +129,10 @@ Behavior:
   - Reads installed version from ~/BASHRC/settings.json
   - Downloads remote settings.json from GitHub raw URL
   - Compares versions using year, month, day comparison
-  - If update available: shows version comparison and update instructions
-  - If up to date: informs user they're running latest version
+  - If update available: shows version comparison and update instructions (always shown)
+  - If up to date: informs user they're running latest version (unless --silent is used)
   - Returns error if BRC not installed or version fetch fails
+  - With --silent: no output when up to date, but still shows update messages if available
 
 Version Comparison:
   - Version format: 0.YYYY.MM.DD (e.g., 0.2025.11.15)
@@ -137,10 +143,18 @@ Dependencies:
   - curl (for downloading settings.json from remote)
   - jq (for parsing JSON version information)
 
-Examples:
-  brcupdate               # Check for available updates
+Configuration:
+  - Automatic checking: Edit ~/BASHRC/settings.json
+    Set "check_for_updates": true or false
+    When enabled, brcupdate --silent is automatically called during shell startup
+    This provides non-intrusive background update checking when starting new shells
 
-Output when update available:
+Examples:
+  brcupdate               # Check for available updates (shows message if up to date)
+  brcupdate --silent      # Check silently (no output if up to date)
+  brcupdate -s            # Check silently (short form)
+
+Output when update available (always shown, even with --silent):
   Update available!
     Installed version: 0.2025.11.14 (2025-11-14)
     Repository version: 0.2025.11.15 (2025-11-15)
@@ -153,14 +167,19 @@ Output when update available:
   ⚠️  Important: Do NOT run ___UPDATE.sh from ~/BASHRC/
      The update script must be run from your cloned git repository directory.
 
-Output when up to date:
+Output when up to date (suppressed with --silent):
   You are running the latest version: 0.2025.11.15
 
 Note: This function only checks for updates and provides instructions.
       It does not perform the actual update. To update, follow the
       instructions provided and run ___UPDATE.sh from your cloned
       git repository directory (not from ~/BASHRC/). Use brcversion()
-      to see your current installed version.
+      to see your current installed version. The --silent flag is useful
+      for running brcupdate in background scripts or during shell startup
+      to avoid unnecessary output when already up to date. The function is
+      automatically called during shell startup if "check_for_updates" is
+      enabled in settings.json, using the --silent flag to provide non-intrusive
+      background checking.
 EOF
             return 0
             ;;

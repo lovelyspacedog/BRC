@@ -13,6 +13,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - **Easy Installation**: Automated installer with backup and rollback support
 - **Configurable**: JSON-based settings for enabling/disabling features
 - **Safe Updates**: Automated update script with version checking and automatic backups
+- **Automatic Update Checking**: Optional background update checking during shell startup
 - **Built-in Manual**: Comprehensive help system with `brchelp` command
 
 ### 🎨 Shell Enhancements
@@ -64,7 +65,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `plugins` - List loaded plugins
 - `aliases` - List all aliases
 - `brcversion` - Show currently installed BRC version
-- `brcupdate` - Check if BRC update is available online
+- `brcupdate` - Check if BRC update is available online (supports `--silent` flag)
 
 ## Installation
 
@@ -167,6 +168,7 @@ Edit `~/BASHRC/settings.json` to enable/disable features:
 
 ```json
 {
+  "check_for_updates": true,
   "enable_automotd": true,
   "enable_blesh": true,
   "enable_manual": true,
@@ -177,6 +179,9 @@ Edit `~/BASHRC/settings.json` to enable/disable features:
   "enable_zoxide": true
 }
 ```
+
+**Settings:**
+- `check_for_updates` - When enabled (true), automatically checks for BRC updates during shell startup using `brcupdate --silent`. This provides non-intrusive background update checking - you'll only see output if an update is actually available.
 
 ### Customization
 
@@ -227,6 +232,7 @@ backup <file>        # Backup a file
 brchelp <function>    # Show manual for a function
 brcversion           # Show installed BRC version
 brcupdate            # Check for available updates
+brcupdate --silent   # Check silently (no output if up to date)
 ```
 
 ## Optional Dependencies

@@ -25,13 +25,14 @@ declare enable_zoxide=true
 declare enable_automotd=true
 declare enable_manual=true
 declare enable_starship=true
+declare check_for_updates=true
 
 # JSON settings file will override default values
 __BASHRC_CONFIG="$HOME/BASHRC/settings.json"
 
 if [[ -f "$__BASHRC_CONFIG" ]]; then
   if command -v jq >/dev/null 2>&1; then
-    for __trigger in enable_blesh enable_shellmommy enable_wlcopy enable_vimkeys enable_zoxide enable_automotd enable_manual enable_starship; do
+    for __trigger in enable_blesh enable_shellmommy enable_wlcopy enable_vimkeys enable_zoxide enable_automotd enable_manual enable_starship check_for_updates; do
       __value=$(jq -r --arg key "$__trigger" '
         if has($key) then
           (.[$key] | if type == "boolean" then tostring else . end)
@@ -78,6 +79,10 @@ if [[ -f "$__BASHRC_CONFIG" ]]; then
       *\"enable_starship\"*)
         __value=$(sed -n 's/.*"enable_starship"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
         [[ "$__value" == "true" || "$__value" == "false" ]] && enable_starship="$__value"
+        ;;
+      *\"check_for_updates\"*)
+        __value=$(sed -n 's/.*"check_for_updates"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p' <<<"$__line")
+        [[ "$__value" == "true" || "$__value" == "false" ]] && check_for_updates="$__value"
         ;;
       esac
     done <"$__BASHRC_CONFIG"
@@ -197,6 +202,10 @@ fi
 }
 type pokefetch &>/dev/null && pokefetch
 type motd &>/dev/null && motd print
+
+if [[ "$check_for_updates" == true && $(type -t brcupdate) == "function" ]]; then
+  brcupdate --silent
+fi
 
 # Initialize zoxide
 [[ "$enable_zoxide" == true ]] && {
