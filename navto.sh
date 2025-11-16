@@ -80,8 +80,8 @@ __navto_create_template() {
   ".": { "name": "Dotfiles",         "path": "$HOME/.config" },
   "T": { "name": "Temporary",        "path": "/tmp" },
   "R": { "name": "Filesystem Root",  "path": "/" },
-  "SE": { "name": "System Etc",      "path": "/etc" },
-  "SV": { "name": "System Var",      "path": "/var" },
+  "SE": { "name": "System /etc",      "path": "/etc" },
+  "SV": { "name": "System /var",      "path": "/var" },
   "SU": { "name": "System /usr",     "path": "/usr" },
   "SO": { "name": "System /opt",     "path": "/opt" },
   "SS": { "name": "System /srv",     "path": "/srv" }
