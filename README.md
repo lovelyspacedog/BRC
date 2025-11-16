@@ -46,7 +46,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `dots` - Manage dotfile shortcuts and navigation
 
 #### Navigation & Bookmarks
-- `navto` - Jump to bookmarked filesystem locations
+- `navto` - JSON-driven bookmarks (list, navigate, add/remove keys; auto-template)
 - `slashback` - Restore previous directories using slash shortcuts
 - `cdd` - Quick directory navigation
 
@@ -215,7 +215,10 @@ Edit `~/BASHRC/settings.json` to enable/disable features:
 # Navigation
 z <directory>        # Jump to frequently used directory
 zi                   # Interactive directory picker
-navto <bookmark>     # Jump to bookmarked location
+navto                # List available destinations from navto.json
+navto X              # Jump to destination by key (case-insensitive)
+navto --remove P     # Remove destination by key
+# Tip: running `navto NEWKEY` offers to add a new destination interactively
 
 # File Operations
 analyze <file>       # Analyze file contents
@@ -273,6 +276,7 @@ BASHRC/
 ├── _manual.sh             # Manual/help system
 ├── _manual_base.sh        # Manual base content
 ├── *.sh                   # Individual plugin scripts
+├── (navto.json)           # User-specific destinations (created by navto, git-ignored)
 ├── user-scripts/          # User custom scripts (auto-loaded)
 │   └── example.sh         # Example template script
 └── README.md              # This file
