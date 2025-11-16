@@ -146,8 +146,32 @@ brcupdate() {
             echo "Error: --ignore-this-version cannot be used with --silent" >&2
             return 1
         fi
+        # If a mask already exists, fail and offer to delete it
+        if [[ -f "$version_mask_file" ]]; then
+            current_mask="$(sed -n '1p' "$version_mask_file" 2>/dev/null | tr -d '\r' | xargs)"
+            echo ""
+            echo "A version mask already exists at: $version_mask_file"
+            echo "Current ignored version: ${current_mask:-<empty>}"
+            read -r -p "Delete existing mask and abort? [y/N]: " __rmask
+            case "${__rmask:-N}" in
+                [Yy]* )
+                    if rm -f "$version_mask_file"; then
+                        echo "Removed existing version mask. Re-run with --ignore-this-version to set a new one."
+                        return 0
+                    else
+                        echo "Error: failed to remove $version_mask_file" >&2
+                        return 1
+                    fi
+                    ;;
+                * )
+                    echo "Keeping existing mask. Cancelled."
+                    return 1
+                    ;;
+            esac
+        fi
         echo ""
         echo "Repository version available: $remote_version"
+        echo
         read -r -p "Ignore this version for future update checks? [y/N]: " __ans
         case "${__ans:-N}" in
             [Yy]* )
