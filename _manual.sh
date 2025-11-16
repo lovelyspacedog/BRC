@@ -676,6 +676,7 @@ Usage:
   navto                    # Show help and list available destinations
   navto <KEY>              # Navigate to destination by key
   navto --remove <KEY>     # Remove destination by key (alias: -r, --delete, -d)
+  navto <NEWKEY>           # If KEY doesn't exist, offers to add it (interactive)
 
 Description:
   - Reads destinations from ~/BASHRC/navto.json (KEY -> {name, path})
