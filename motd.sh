@@ -19,6 +19,19 @@ motd() {
     return 0
     ;;
   "MAKE")
+    # If stdin is not a terminal (i.e., data is being piped), write it to motd.txt.
+    if [[ ! -t 0 ]]; then
+      if ! ensure_commands_present --caller "motd make (stdin)" cat; then
+        return 123
+      fi
+      if ! cat > "$HOME/motd.txt"; then
+        echo "Error: failed to write message of the day from stdin"
+        return 1
+      fi
+      return 0
+    fi
+
+    # Otherwise, open the editor to edit/create motd.txt.
     local editor="${EDITOR:-nvim}"
     if ! ensure_commands_present --caller "motd make" "$editor"; then
       return 123
