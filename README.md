@@ -242,6 +242,7 @@ brchelp <function>    # Show manual for a function
 brcversion           # Show installed BRC version
 brcupdate            # Check for available updates
 brcupdate --silent   # Check silently (no output if up to date)
+brcupdate --ignore-this-version  # Mask current repo version (creates ~/BASHRC/version.mask)
 ```
 
 ## Optional Dependencies
@@ -284,6 +285,12 @@ BASHRC/
 ```
 
 **Note**: `_PREAMBLE.sh`, `_PLUGINS.sh`, and `_ALIASES.sh` are generated automatically by `___INSTALL.sh` from templates if they don't exist. Once generated, your manual edits to these files are preserved across updates (they won't be overwritten unless you delete them). The `user-scripts/` directory is created automatically for custom scripts that are loaded automatically by the plugin system.
+
+### Update Version Mask
+- You can temporarily ignore an available update by masking its version:
+  - Run: `brcupdate --ignore-this-version` (prompts to confirm)
+  - This stores the repository version in `~/BASHRC/version.mask` and treats it as installed for comparisons
+  - To restore normal checks, delete the mask: `rm -f ~/BASHRC/version.mask`
 
 ## Reverting Changes
 
