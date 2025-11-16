@@ -353,6 +353,28 @@ if [[ "$update_needed" == "true" ]]; then
           log_detail "No backup for $restore_name (checked: $src_path1 and $src_path2)"
         fi
       done
+      
+      # Restore navto.json if it existed in backup (user-specific destinations)
+      log_step "Restore" "Restoring navto.json (destinations) if present in backup"
+      pause
+      navto_src1="$backup_dir/BASHRC/navto.json"
+      navto_src2="$backup_dir/navto.json"
+      navto_dst="$INSTALLED_DIR/navto.json"
+      if [[ -f "$navto_src1" ]]; then
+        if cp -f "$navto_src1" "$navto_dst"; then
+          log_success "Restored navto.json from backup"
+        else
+          log_warn "Failed to restore navto.json from backup"
+        fi
+      elif [[ -f "$navto_src2" ]]; then
+        if cp -f "$navto_src2" "$navto_dst"; then
+          log_success "Restored navto.json from backup (alternate layout)"
+        else
+          log_warn "Failed to restore navto.json from backup (alternate layout)"
+        fi
+      else
+        log_detail "No navto.json found in backup (checked: $navto_src1 and $navto_src2)"
+      fi
       printf "\n"
     fi
     
