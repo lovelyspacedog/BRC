@@ -77,10 +77,14 @@ brcupdate() {
 
     # Parse arguments for silent flag
     local silent=false
+    local ignore_this_version=false
     for arg in "$@"; do
         case "$arg" in
             --silent|-s)
                 silent=true
+                ;;
+            --ignore-this-version|--ignore)
+                ignore_this_version=true
                 ;;
             *)
                 # Ignore unknown arguments
@@ -89,6 +93,7 @@ brcupdate() {
     done
 
     local installed_settings="$HOME/BASHRC/settings.json"
+    local version_mask_file="$HOME/BASHRC/version.mask"
     local git_raw_base="https://raw.githubusercontent.com/lovelyspacedog/BRC"
     local branch="main"
     
@@ -101,6 +106,15 @@ brcupdate() {
     # Get installed version
     local installed_version
     installed_version=$(jq -r '.VERSION // empty' "$installed_settings" 2>/dev/null || echo "")
+    # If a version mask exists, use it instead of the installed VERSION
+    if [[ -f "$version_mask_file" ]]; then
+        local masked_version
+        masked_version="$(sed -n '1p' "$version_mask_file" 2>/dev/null | tr -d '\r' | xargs)"
+        if [[ -n "$masked_version" ]]; then
+            installed_version="$masked_version"
+            [[ "$silent" != "true" ]] && echo "Using masked version from $version_mask_file: $installed_version"
+        fi
+    fi
     if [[ -z "$installed_version" ]]; then
         echo "Error: Could not read VERSION from $installed_settings" >&2
         return 1
@@ -124,6 +138,32 @@ brcupdate() {
     if [[ -z "$remote_version" ]]; then
         echo "Error: Could not read VERSION from repository" >&2
         return 1
+    fi
+
+    # If the user passed --ignore-this-version, offer to store the current remote version in a mask file
+    if [[ "$ignore_this_version" == "true" ]]; then
+        if [[ "$silent" == "true" ]]; then
+            echo "Error: --ignore-this-version cannot be used with --silent" >&2
+            return 1
+        fi
+        echo ""
+        echo "Repository version available: $remote_version"
+        read -r -p "Ignore this version for future update checks? [y/N]: " __ans
+        case "${__ans:-N}" in
+            [Yy]* )
+                if printf "%s\n" "$remote_version" > "$version_mask_file"; then
+                    echo "Saved ignored version to $version_mask_file"
+                    return 0
+                else
+                    echo "Error: failed to write $version_mask_file" >&2
+                    return 1
+                fi
+                ;;
+            * )
+                echo "Cancelled."
+                return 1
+                ;;
+        esac
     fi
     
     # Parse version format: 0.YYYY.MM.DD
@@ -181,6 +221,9 @@ brcupdate() {
         echo "Update available!"
         echo "  Installed version: $installed_version ($installed_year-$installed_month-$installed_day)"
         echo "  Repository version: $remote_version ($remote_year-$remote_month-$remote_day)"
+        echo ""
+        echo "Tips:"
+        echo "  - To ignore this repository version in future checks, run: brcupdate --ignore-this-version"
         echo ""
         echo "To update:"
         echo "  1. Navigate to your cloned BRC repository directory"
