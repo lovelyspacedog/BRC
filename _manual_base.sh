@@ -111,12 +111,17 @@ brcupdate - Check for BRC Updates
 
 Check if a newer version of BRC is available in the repository.
 
-Usage: brcupdate [--silent|-s]
+Usage: brcupdate [--silent|-s] [--ignore-this-version|--ignore]
 
 Options:
   --silent, -s    Suppress output when no update is available
                   Update messages still display when an update is found
                   Useful for background checks in scripts
+  --ignore-this-version, --ignore
+                  Store the currently available repository version in a mask file
+                  (~/BASHRC/version.mask) so it is treated as "installed" in
+                  future checks. Not allowed with --silent. If a mask already
+                  exists, the command will fail and offer to delete it.
 
 Description:
   - Compares installed version with the repository version online
@@ -124,6 +129,7 @@ Description:
   - Parses and compares version numbers (format: 0.YYYY.MM.DD)
   - Informs user if an update is available and how to update
   - Does not perform the update (just checks and informs)
+  - Supports masking an update version so you can ignore it temporarily
 
 Behavior:
   - Reads installed version from ~/BASHRC/settings.json
@@ -133,6 +139,11 @@ Behavior:
   - If up to date: informs user they're running latest version (unless --silent is used)
   - Returns error if BRC not installed or version fetch fails
   - With --silent: no output when up to date, but still shows update messages if available
+  - Version mask:
+      - If ~/BASHRC/version.mask exists, its version overrides settings.json VERSION
+        for comparison and is reported as the installed version
+      - To set the mask, run: brcupdate --ignore-this-version (prompts to confirm)
+      - To remove the mask, delete the file: rm -f ~/BASHRC/version.mask
 
 Version Comparison:
   - Version format: 0.YYYY.MM.DD (e.g., 0.2025.11.15)
@@ -153,6 +164,10 @@ Examples:
   brcupdate               # Check for available updates (shows message if up to date)
   brcupdate --silent      # Check silently (no output if up to date)
   brcupdate -s            # Check silently (short form)
+  brcupdate --ignore-this-version
+                          # Save the current repository version into ~/BASHRC/version.mask
+                          # Future checks will consider this version "installed" until you
+                          # delete the mask file
 
 Output when update available (always shown, even with --silent):
   Update available!

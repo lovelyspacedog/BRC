@@ -152,7 +152,8 @@ brcupdate() {
             echo ""
             echo "A version mask already exists at: $version_mask_file"
             echo "Current ignored version: ${current_mask:-<empty>}"
-            read -r -p "Delete existing mask and abort? [y/N]: " __rmask
+            echo ""
+            read -r -p "Delete existing mask? [y/N]: " __rmask
             case "${__rmask:-N}" in
                 [Yy]* )
                     if rm -f "$version_mask_file"; then
