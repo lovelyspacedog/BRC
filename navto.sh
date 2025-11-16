@@ -22,7 +22,6 @@ navto() {
     echo "  U     - System applications"
     echo "  U2    - User applications"
     echo "  U3    - Local applications"
-    echo "  B     - SSH to expedition"
     echo "  C     - Code/Projects"
     echo "  T     - Templates"
     echo "  R     - Recent downloads"
@@ -71,14 +70,6 @@ navto() {
     ;;
   "U3" | "LOCAL")
     cd "/usr/local/share/applications"
-    ;;
-  "B" | "SSH" | "EXPEDITION")
-    # Use SSH config or environment variable for security
-    if ! ensure_commands_present --caller "navto ssh" ssh; then
-      return 123
-    fi
-    ssh tonypup@expedition.whatbox.ca
-    return $?
     ;;
   "C" | "CODE" | "PROJECTS")
     cd "$HOME/Code" 2>/dev/null || cd "$HOME/Projects" 2>/dev/null || cd "$HOME"
