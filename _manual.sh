@@ -1238,6 +1238,7 @@ Description:
   - Offers to update if repository version is newer
   - Performs safe update with automatic backups
   - Runs installer from the git repository directory
+  - After install, auto-restores user custom files and user-scripts from backup
 
 Update Process:
   1. Version Check: Reads installed version from ~/BASHRC/settings.json
@@ -1277,6 +1278,11 @@ Behavior:
   - Prompts user before proceeding with update
   - Shows clear version comparison information
   - Runs ___INSTALL.sh after successful backups
+  - Restores from backup (if present):
+    - Files: _PREAMBLE.sh, _ALIASES.sh, _PLUGINS.sh
+    - user-scripts directory (excluding example.sh), preserving structure
+    - Supports both backup layouts: <backup>/BASHRC/<file> and <backup>/<file>
+    - Ensures restored *.sh files are executable
   - After installation, compares backup files with current installation
   - Displays list of files in backup that aren't in current installation
   - Warns user to check backup directory for custom scripts to port over
