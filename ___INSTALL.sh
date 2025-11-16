@@ -468,6 +468,8 @@ if ((${#sh_files[@]} > 0)); then
     exit 40
   fi
   log_success "Shell scripts copied to $HOME/BASHRC"
+  # Ensure copied shell scripts are executable
+  find "$bashrc_dir" -maxdepth 1 -type f -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
   pause
 else
   log_warn "No *.sh scripts found in the repository. Nothing copied."
@@ -503,6 +505,8 @@ EXAMPLE_EOF
       log_warn "Failed to create example.sh template. Installation will continue."
     else
       log_success "example.sh template created in user-scripts directory"
+      # Ensure example script is executable
+      chmod +x "$example_file" 2>/dev/null || true
     fi
     pause
   fi
@@ -545,6 +549,8 @@ PREAMBLE_EOF
     log_warn "Failed to create _PREAMBLE.sh. Installation will continue."
   else
     log_success "_PREAMBLE.sh created in $HOME/BASHRC"
+    # Ensure template is executable
+    chmod +x "$preamble_file" 2>/dev/null || true
   fi
   pause
 else
@@ -632,6 +638,8 @@ PLUGINS_EOF
     exit 52
   else
     log_success "_PLUGINS.sh created in $HOME/BASHRC"
+    # Ensure template is executable
+    chmod +x "$plugins_file" 2>/dev/null || true
   fi
   pause
 else
@@ -752,6 +760,8 @@ ALIASES_EOF
     exit 53
   else
     log_success "_ALIASES.sh created in $HOME/BASHRC"
+    # Ensure template is executable
+    chmod +x "$aliases_file" 2>/dev/null || true
   fi
   pause
 else
