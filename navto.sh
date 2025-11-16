@@ -66,6 +66,37 @@ __navto_remove_destination() {
   return 0
 }
 
+# These are the default destinations if no navto.json file exists
+__navto_create_template() {
+  local json_file="$1"
+  if cat > "$json_file" <<'JSON_TMPL'
+{
+  "X": { "name": "Home",             "path": "$HOME" },
+  "D": { "name": "Documents",        "path": "$HOME/Documents" },
+  "P": { "name": "Pictures",         "path": "$HOME/Pictures" },
+  "V": { "name": "Videos",           "path": "$HOME/Videos" },
+  "M": { "name": "Music",            "path": "$HOME/Music" },
+  "L": { "name": "Downloads",        "path": "$HOME/Downloads" },
+  ".": { "name": "Dotfiles",         "path": "$HOME/.config" },
+  "T": { "name": "Temporary",        "path": "/tmp" },
+  "R": { "name": "Filesystem Root",  "path": "/" },
+  "SE": { "name": "System Etc",      "path": "/etc" },
+  "SV": { "name": "System Var",      "path": "/var" },
+  "SU": { "name": "System /usr",     "path": "/usr" },
+  "SO": { "name": "System /opt",     "path": "/opt" },
+  "SS": { "name": "System /srv",     "path": "/srv" }
+}
+JSON_TMPL
+  then
+    printf "\n\e[1;32m✅ Created template:\e[0m %s\n" "$json_file"
+    printf "\e[2mTip:\e[0m run \e[1mnavto\e[0m to see available destinations.\n"
+    return 0
+  else
+    printf "\e[1;31mError:\e[0m failed to write template to %s\n" "$json_file"
+    return 1
+  fi
+}
+
 __navto_add_destination() {
   local add_key="$1"
   local json_file="$__NAVTO_DIR/navto.json"
@@ -176,30 +207,9 @@ navto() {
         read -r -p $'\n\e[1mCreate a starter template now?\e[0m [y/N]: ' __mk
         case "${__mk:-N}" in
           [Yy]* )
-            if cat > "$json_file" <<'JSON_TMPL'
-{
-  "X": { "name": "Home",             "path": "$HOME" },
-  "D": { "name": "Documents",        "path": "$HOME/Documents" },
-  "P": { "name": "Pictures",         "path": "$HOME/Pictures" },
-  "V": { "name": "Videos",           "path": "$HOME/Videos" },
-  "M": { "name": "Music",            "path": "$HOME/Music" },
-  "L": { "name": "Downloads",        "path": "$HOME/Downloads" },
-  ".": { "name": "Dotfiles",         "path": "$HOME/.config" },
-  "T": { "name": "Temporary",        "path": "/tmp" },
-  "R": { "name": "Filesystem Root",  "path": "/" },
-  "SE": { "name": "System Etc",      "path": "/etc" },
-  "SV": { "name": "System Var",      "path": "/var" },
-  "SU": { "name": "System /usr",     "path": "/usr" },
-  "SO": { "name": "System /opt",     "path": "/opt" },
-  "SS": { "name": "System /srv",     "path": "/srv" }
-}
-JSON_TMPL
-            then
-              printf "\n\e[1;32m✅ Created template:\e[0m %s\n" "$json_file"
-              printf "\e[2mTip:\e[0m run \e[1mnavto\e[0m to see available destinations.\n"
+            if __navto_create_template "$json_file"; then
               return 0
             else
-              printf "\e[1;31mError:\e[0m failed to write template to %s\n" "$json_file"
               return 1
             fi
             ;;
@@ -224,31 +234,9 @@ JSON_TMPL
     read -r -p $'\n\e[1mCreate a starter template now?\e[0m [y/N]: ' __mk
     case "${__mk:-N}" in
       [Yy]* )
-        # Write a generic template with common Linux directories
-        if cat > "$json_file" <<'JSON_TMPL'
-{
-  "X": { "name": "Home",             "path": "$HOME" },
-  "D": { "name": "Documents",        "path": "$HOME/Documents" },
-  "P": { "name": "Pictures",         "path": "$HOME/Pictures" },
-  "V": { "name": "Videos",           "path": "$HOME/Videos" },
-  "M": { "name": "Music",            "path": "$HOME/Music" },
-  "L": { "name": "Downloads",        "path": "$HOME/Downloads" },
-  ".": { "name": "Dotfiles",         "path": "$HOME/.config" },
-  "T": { "name": "Temporary",        "path": "/tmp" },
-  "R": { "name": "Filesystem Root",  "path": "/" },
-  "SE": { "name": "System Etc",      "path": "/etc" },
-  "SV": { "name": "System Var",      "path": "/var" },
-  "SU": { "name": "System /usr",     "path": "/usr" },
-  "SO": { "name": "System /opt",     "path": "/opt" },
-  "SS": { "name": "System /srv",     "path": "/srv" }
-}
-JSON_TMPL
-        then
-          printf "\n\e[1;32m✅ Created template:\e[0m %s\n" "$json_file"
-          printf "\e[2mTip:\e[0m run \e[1mnavto\e[0m to see available destinations.\n"
+        if __navto_create_template "$json_file"; then
           return 0
         else
-          printf "\e[1;31mError:\e[0m failed to write template to %s\n" "$json_file"
           return 1
         fi
         ;;
