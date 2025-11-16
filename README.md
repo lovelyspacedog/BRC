@@ -269,15 +269,16 @@ BASHRC/
 ├── ___UPDATE.sh           # Automated update script
 ├── .bashrc.copyToHome     # Template .bashrc file
 ├── settings.json          # Default settings
-├── _PLUGINS.sh            # Plugin loader (generated from template)
-├── _ALIASES.sh            # Alias definitions (generated from template)
+├── _PREAMBLE.sh           # Environment preamble (generated from template, git-ignored)
+├── _PLUGINS.sh            # Plugin loader (generated from template, git-ignored)
+├── _ALIASES.sh            # Alias definitions (generated from template, git-ignored)
 ├── _BASE_FUNCTIONS.sh     # Core helper functions
 ├── _DEPENDENCY_CHECK.sh   # Dependency checking utilities
 ├── _manual.sh             # Manual/help system
 ├── _manual_base.sh        # Manual base content
 ├── *.sh                   # Individual plugin scripts
 ├── (navto.json)           # User-specific destinations (created by navto, git-ignored)
-├── user-scripts/          # User custom scripts (auto-loaded)
+├── user-scripts/          # User custom scripts (auto-loaded, git-ignored)
 │   └── example.sh         # Example template script
 └── README.md              # This file
 ```
