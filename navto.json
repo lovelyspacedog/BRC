@@ -1,0 +1,72 @@
+{
+    "X": {
+        "name": "Home",
+        "path": "$HOME"
+    },
+    "P": {
+        "name": "Pictures",
+        "path": "$HOME/Pictures"
+    },
+    "V": {
+        "name": "Videos",
+        "path": "$HOME/Videos"
+    },
+    "M": {
+        "name": "Music",
+        "path": "$HOME/Music"
+    },
+    "D": {
+        "name": "Documents",
+        "path": "$HOME/Documents"
+    },
+    "L": {
+        "name": "Downloads",
+        "path": "$HOME/Downloads"
+    },
+    "W": {
+        "name": "Wallpapers",
+        "path": "$HOME/Videos/wallpapers"
+    },
+    ".": {
+        "name": ".config",
+        "path": "$HOME/.config"
+    },
+    "H": {
+        "name": "Hyprland config",
+        "path": "$HOME/.config/hypr"
+    },
+    "S": {
+        "name": "Hyprland scripts",
+        "path": "$HOME/.config/hyprScripts"
+    },
+    "WB": {
+        "name": "Waybar config",
+        "path": "$HOME/.config/waybar"
+    },
+    "U": {
+        "name": "System applications",
+        "path": "/usr/share/applications"
+    },
+    "U2": {
+        "name": "User applications",
+        "path": "$HOME/.local/share/applications"
+    },
+    "U3": {
+        "name": "Local applications",
+        "path": "/usr/local/share/applications"
+    },
+    "C": {
+        "name": "Code/Projects",
+        "path": "$HOME/Code"
+    },
+    "T": {
+        "name": "Templates",
+        "path": "$HOME/Templates"
+    }
+}
+{
+    "X": {
+        "name": "Home",
+        "path": "$HOME"
+    }
+}
