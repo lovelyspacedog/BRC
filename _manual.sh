@@ -631,13 +631,16 @@ Description:
 Commands:
   (no args)      Show help message
   print          Display the current message of the day
-  make           Create or edit the message of the day file in editor
+  make           Create or edit the message of the day
+                 - If stdin is piped, writes stdin to ~/motd.txt
+                 - If no stdin is piped, opens ~/motd.txt in \$EDITOR
   shoo           Remove the message of the day file
 
 Behavior:
   - Without arguments: shows help message
   - "motd print": displays ~/motd.txt if it exists (with a 1 second pause)
-  - "motd make": opens ~/motd.txt in editor (creates if it doesn't exist)
+  - "motd make": when data is piped in, writes to ~/motd.txt (creates/overwrites)
+                 otherwise opens ~/motd.txt in editor (creates if it doesn't exist)
   - "motd shoo": deletes ~/motd.txt file
   - Commands are case-insensitive
 
@@ -652,7 +655,8 @@ Files:
 Examples:
   motd              # Show help message
   motd print        # Display current message
-  motd make         # Edit/create message in nvim
+  motd make         # Edit/create message in editor
+  echo "Hello" | motd make   # Create/overwrite message from stdin
   motd shoo         # Delete message file
 
 Note: This works in conjunction with automotd.sh, which can automatically
