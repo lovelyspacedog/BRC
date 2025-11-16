@@ -1825,6 +1825,7 @@ Available functions:
   ___INSTALL      - BRC installation script
   ___UPDATE       - BRC update script
   _ALIASES        - Shell alias definitions
+  _DEPENDENCY_CHECK - Dependency check utilities
   _PLUGINS        - Plugin loader system
   _PREAMBLE       - User customization file
   analyze-file    - File analysis tool
