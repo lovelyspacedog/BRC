@@ -153,6 +153,7 @@ brcupdate() {
             [Yy]* )
                 if printf "%s\n" "$remote_version" > "$version_mask_file"; then
                     echo "Saved ignored version to $version_mask_file"
+                    echo "To restore normal checks, delete this file: rm -f \"$version_mask_file\""
                     return 0
                 else
                     echo "Error: failed to write $version_mask_file" >&2
