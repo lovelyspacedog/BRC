@@ -329,17 +329,28 @@ if [[ "$update_needed" == "true" ]]; then
       log_step "Restore" "Restoring user custom files (_PREAMBLE.sh, _ALIASES.sh, _PLUGINS.sh)"
       pause
       for restore_name in "_PREAMBLE.sh" "_ALIASES.sh" "_PLUGINS.sh"; do
-        src_path="$backup_dir/BASHRC/$restore_name"
+        # Support both backup layouts:
+        # 1) backup_dir/BASHRC/<file> (current behavior)
+        # 2) backup_dir/<file> (legacy/alternate behavior)
+        src_path1="$backup_dir/BASHRC/$restore_name"
+        src_path2="$backup_dir/$restore_name"
         dst_path="$INSTALLED_DIR/$restore_name"
-        if [[ -f "$src_path" ]]; then
-          if cp -f "$src_path" "$dst_path"; then
+        if [[ -f "$src_path1" ]]; then
+          if cp -f "$src_path1" "$dst_path"; then
             chmod +x "$dst_path" 2>/dev/null || true
             log_success "Restored $restore_name from backup"
           else
             log_warn "Failed to restore $restore_name from backup"
           fi
+        elif [[ -f "$src_path2" ]]; then
+          if cp -f "$src_path2" "$dst_path"; then
+            chmod +x "$dst_path" 2>/dev/null || true
+            log_success "Restored $restore_name from backup (alternate layout)"
+          else
+            log_warn "Failed to restore $restore_name from backup (alternate layout)"
+          fi
         else
-          log_detail "No backup for $restore_name (skipping)"
+          log_detail "No backup for $restore_name (checked: $src_path1 and $src_path2)"
         fi
       done
       printf "\n"
@@ -348,26 +359,33 @@ if [[ "$update_needed" == "true" ]]; then
     # Check for files in backup that aren't in current installation
     if [[ -d "$backup_dir" ]]; then
       # Restore user-scripts (excluding example.sh) if present in backup
-      if [[ -d "$backup_dir/BASHRC/user-scripts" && -d "$INSTALLED_DIR" ]]; then
-        log_step "Restore" "Restoring user-scripts from backup (excluding example.sh)"
-        pause
-        mkdir -p "$INSTALLED_DIR/user-scripts" 2>/dev/null || true
-        # Copy all files except example.sh, preserving directory structure
-        while IFS= read -r -d '' src_file; do
-          base_name="$(basename "$src_file")"
-          [[ "$base_name" == "example.sh" ]] && continue
-          rel_path="${src_file#$backup_dir/BASHRC/user-scripts/}"
-          dest_file="$INSTALLED_DIR/user-scripts/$rel_path"
-          mkdir -p "$(dirname "$dest_file")" 2>/dev/null || true
-          if cp -f "$src_file" "$dest_file"; then
-            # Ensure executability for .sh files
-            [[ "$dest_file" == *.sh ]] && chmod +x "$dest_file" 2>/dev/null || true
-            log_success "Restored user-scripts/$rel_path"
-          else
-            log_warn "Failed to restore user-scripts/$rel_path"
-          fi
-        done < <(find "$backup_dir/BASHRC/user-scripts" -type f -print0 2>/dev/null || true)
-        printf "\n"
+      if [[ -d "$INSTALLED_DIR" ]]; then
+        src_userscripts1="$backup_dir/BASHRC/user-scripts"
+        src_userscripts2="$backup_dir/user-scripts"
+        if [[ -d "$src_userscripts1" || -d "$src_userscripts2" ]]; then
+          log_step "Restore" "Restoring user-scripts from backup (excluding example.sh)"
+          pause
+          mkdir -p "$INSTALLED_DIR/user-scripts" 2>/dev/null || true
+          # Choose available source (prefer current layout)
+          restore_src="$src_userscripts1"
+          [[ -d "$restore_src" ]] || restore_src="$src_userscripts2"
+          # Copy all files except example.sh, preserving directory structure
+          while IFS= read -r -d '' src_file; do
+            base_name="$(basename "$src_file")"
+            [[ "$base_name" == "example.sh" ]] && continue
+            rel_path="${src_file#$restore_src/}"
+            dest_file="$INSTALLED_DIR/user-scripts/$rel_path"
+            mkdir -p "$(dirname "$dest_file")" 2>/dev/null || true
+            if cp -f "$src_file" "$dest_file"; then
+              # Ensure executability for .sh files
+              [[ "$dest_file" == *.sh ]] && chmod +x "$dest_file" 2>/dev/null || true
+              log_success "Restored user-scripts/$rel_path"
+            else
+              log_warn "Failed to restore user-scripts/$rel_path"
+            fi
+          done < <(find "$restore_src" -type f -print0 2>/dev/null || true)
+          printf "\n"
+        fi
       fi
       
       log_step "Backup Check" "Checking for custom files in backup"
