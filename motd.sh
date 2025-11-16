@@ -15,6 +15,7 @@ motd() {
       echo "Error: failed to remove message of the day file"
       return 1
     fi
+    echo "MOTD file removed"
     return 0
     ;;
   "MAKE")
