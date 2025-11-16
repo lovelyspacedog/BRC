@@ -145,13 +145,15 @@ The project includes an automated update script that compares your installed ver
    - Create timestamped backups of `~/.bashrc` and `~/BASHRC`
    - Run the installer to update your installation
    - Compare backup files with the new installation to identify custom scripts you may need to port over
-   - Preserve `_PREAMBLE.sh`, `_PLUGINS.sh`, and `_ALIASES.sh` (never overwritten once generated, only generated if missing)
+   - Automatically restore your `_PREAMBLE.sh`, `_PLUGINS.sh`, and `_ALIASES.sh` from the backup into `~/BASHRC`
+   - Automatically restore your `user-scripts` (excluding `example.sh`), preserving directory structure
+   - Supports both backup layouts (`<backup>/BASHRC/<file>` and `<backup>/<file>`) and ensures restored `*.sh` are executable
 
 4. After updating, check the backup directory for any custom files:
    ```bash
    ls ~/BASHRC.backup.*
    ```
-   Port over any custom scripts you had in your old installation. Note that `_PREAMBLE.sh`, `_PLUGINS.sh`, and `_ALIASES.sh` are preserved automatically during updates (they won't be overwritten once generated). Also check your `user-scripts/` directory for custom scripts.
+   Port over any remaining custom files you need. The update script already restores `_PREAMBLE.sh`, `_PLUGINS.sh`, `_ALIASES.sh`, and your `user-scripts` (excluding `example.sh`), but you should still review the backup for anything else you want to keep.
 
 ### Manual Update
 
