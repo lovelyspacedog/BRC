@@ -40,6 +40,44 @@ Note: Provides different analysis based on file type
 EOF
                 return 0
                 ;;
+            _DEPENDENCY_CHECK|dependency-check|dependency_check)
+                cat <<EOF
+_DEPENDENCY_CHECK.sh - Dependency Check Utilities
+
+Helpers for verifying required external commands are available before proceeding.
+
+Primary Function:
+  ensure_commands_present [--caller NAME] [--quiet] CMD [CMD...]
+
+Description:
+  - Verifies that each specified command exists in PATH
+  - When any command is missing:
+      - Prints an error message (includes caller name if provided)
+      - Returns exit code 123 (conventional "missing dependency" code in BRC)
+  - When all commands are present:
+      - Returns 0
+  - Useful to guard optional features on external tools
+
+Options:
+  --caller NAME   Prefix messages with a human-friendly context (e.g., "motd make")
+  --quiet         Suppress normal output; only exit codes indicate status
+
+Exit Codes:
+  0    All dependencies are present
+  123  One or more required commands are missing
+
+Examples:
+  ensure_commands_present --caller "motd shoo" rm
+  ensure_commands_present --caller "motd print" cat
+  ensure_commands_present --caller "motd make" "\$EDITOR"
+  ensure_commands_present git curl jq
+
+Notes:
+  - Designed to be lightweight and safe in interactive shells
+  - Used throughout BRC scripts to fail fast with clear messages
+EOF
+                return 0
+                ;;
             automotd)
                 cat <<EOF
 automotd - Automatic Message of the Day
