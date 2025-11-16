@@ -27,6 +27,8 @@ motd() {
       if ! cat > "$HOME/motd.txt"; then
         echo "Error: failed to write message of the day from stdin"
         return 1
+      else
+        echo "Message of the day written to file"
       fi
       return 0
     fi
