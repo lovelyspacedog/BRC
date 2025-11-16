@@ -174,6 +174,9 @@ Features:
   - Result limiting: Maximum 10 results per source (yay/flatpak)
   - Interactive installation: Prompts for confirmation before installing
   - Non-interactive safety: Only runs in interactive shells (has TTY)
+  - Background searches: runs searches silently (no shell job notifications)
+  - Cancel anytime: press any key during search to cancel immediately; on cancel it prints
+    the standard "bash: <cmd>: command not found" and returns 127
 
 Search Behavior:
   - Yay search: Searches both exact matches and broader patterns
@@ -210,11 +213,15 @@ Examples:
   # 
   # Would you like to install one of these packages? [y/N]:
   # [User selects package and it gets installed]
+  # Note: You can press any key while it's searching to cancel. On cancel, it shows
+  #       the standard "bash: <cmd>: command not found" message.
 
 Behavior:
   - Only runs in interactive shells (checks for TTY)
   - Non-interactive shells get standard "command not found" error
   - 10-second timeout for initial installation prompt
+  - If you decline installation or quit selection, it prints "Installation cancelled."
+    and then the standard "bash: <cmd>: command not found"
   - Returns exit code 127 (command not found) if:
     - No packages found
     - User declines installation

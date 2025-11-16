@@ -21,6 +21,24 @@ command_not_found_handle() {
     local -a yay_packages=()
     local -a flatpak_packages=()
     local found_any=false
+    local __search_cancelled=0
+    local __cancel_key=""
+    
+    # Helper: wait on PID while allowing user to cancel with any key
+    wait_for_or_cancel() {
+        local __pid="$1"
+        while kill -0 "$__pid" >/dev/null 2>&1; do
+            if read -t 0.05 -n 1 -s __cancel_key; then
+                __search_cancelled=1
+                kill "$__pid" >/dev/null 2>&1
+                wait "$__pid" 2>/dev/null
+                return 1
+            fi
+            sleep 0.05
+        done
+        wait "$__pid" 2>/dev/null
+        return 0
+    }
 
     printf "\nCommand '%s' not found. Searching for packages...\n\n" "$cmd"
 
@@ -32,13 +50,23 @@ command_not_found_handle() {
         # We use regex to extract repo/package patterns directly, which works even with escape sequences
         # First try exact match (official repos often appear later), then broader search
         local yay_results
-        local exact_match
-        exact_match=$(yay -Ss "^${cmd}$" 2>/dev/null | head -20)
-        # Also get broader search results (more lines to catch official packages that appear later)
-        local broad_results
-        broad_results=$(yay -Ss "$cmd" 2>/dev/null | head -100)
-        # Combine results, prioritizing exact matches
-        yay_results="${exact_match}${exact_match:+$'\n'}${broad_results}"
+        local yay_tmp
+        yay_tmp="$(mktemp)"
+        # Run search fully detached to suppress job control messages
+        YTMP="$yay_tmp" YCMD="$cmd" nohup bash -c '
+            exact_match=$(yay -Ss "^${YCMD}$" 2>/dev/null | head -20)
+            broad_results=$(yay -Ss "$YCMD" 2>/dev/null | head -100)
+            printf "%s%s%s" "${exact_match}" "${exact_match:+$'\''\n'\''}" "${broad_results}" > "$YTMP"
+        ' </dev/null >/dev/null 2>&1 &
+        local yay_pid=$!
+        disown "$yay_pid" >/dev/null 2>&1
+        if ! wait_for_or_cancel "$yay_pid"; then
+            rm -f "$yay_tmp"
+            printf "bash: %s: command not found\n" "$cmd" >&2
+            return 127
+        fi
+        yay_results="$(cat "$yay_tmp" 2>/dev/null)"
+        rm -f "$yay_tmp"
         
         if [[ -n "$yay_results" ]]; then
             # Use associative array to track seen packages (remove duplicates)
@@ -157,7 +185,21 @@ command_not_found_handle() {
         local flatpak_results
         # flatpak search output: Application ID, Version, Branch, Origin, Summary
         # Output format can be tab-separated or space-separated
-        flatpak_results=$(flatpak search "$cmd" 2>/dev/null | head -20)
+        local flatpak_tmp
+        flatpak_tmp="$(mktemp)"
+        # Run search fully detached to suppress job control messages
+        FTMP="$flatpak_tmp" FCMD="$cmd" nohup bash -c '
+            flatpak search "$FCMD" 2>/dev/null | head -20 > "$FTMP"
+        ' </dev/null >/dev/null 2>&1 &
+        local flatpak_pid=$!
+        disown "$flatpak_pid" >/dev/null 2>&1
+        if ! wait_for_or_cancel "$flatpak_pid"; then
+            rm -f "$flatpak_tmp"
+            printf "bash: %s: command not found\n" "$cmd" >&2
+            return 127
+        fi
+        flatpak_results="$(cat "$flatpak_tmp" 2>/dev/null)"
+        rm -f "$flatpak_tmp"
         
         if [[ -n "$flatpak_results" ]]; then
             local found_flatpak=false
@@ -218,6 +260,7 @@ command_not_found_handle() {
     
     [[ "${response,,}" != "y" ]] && {
         printf "Installation cancelled.\n"
+        printf "bash: %s: command not found\n" "$cmd" >&2
         return 127
     }
 
@@ -246,6 +289,7 @@ command_not_found_handle() {
     
     [[ "${choice,,}" == "q" ]] && {
         printf "Installation cancelled.\n"
+        printf "bash: %s: command not found\n" "$cmd" >&2
         return 127
     }
 

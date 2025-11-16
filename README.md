@@ -58,6 +58,9 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `motd` - Message-of-the-day display
 - `dl-paper` - Download wallpapers from YouTube
 - `cmd-not-found` - Enhanced command-not-found handler
+  - Press any key during search to cancel immediately
+  - On cancel or if you decline/quit installation, prints the standard bash error:
+    `bash: <cmd>: command not found`
 
 #### Configuration
 - `bashrc` - Edit `.bashrc` file
