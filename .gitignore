@@ -4,6 +4,8 @@ _PREAMBLE.sh
 _PLUGINS.sh
 _ALIASES.sh
 FUNCTION_ORGANIZATION.md
+FUNCTION_REFERENCE.md
+ORGANIZATION_IMPROVEMENTS.md
 _check_templates.sh
 user-scripts
 navto.json
