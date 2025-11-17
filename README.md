@@ -48,7 +48,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `dots` - Manage dotfile shortcuts and navigation
 
 #### Navigation & Bookmarks
-- `navto` - JSON-driven bookmarks (list, navigate, add/remove keys; auto-template)
+- `navto` - JSON-driven bookmarks (list, navigate, add/remove keys; auto-template; tab completion with names)
 - `slashback` - Restore previous directories using slash shortcuts
 - `cdd` - Quick directory navigation
 
@@ -220,6 +220,7 @@ zi                   # Interactive directory picker
 navto                # List available destinations from navto.json
 navto X              # Jump to destination by key (case-insensitive)
 navto --remove P     # Remove destination by key
+navto <Tab>          # Tab completion shows destinations with names (e.g., "P - Pictures")
 # Tip: running `navto NEWKEY` offers to add a new destination interactively
 
 # File Operations

@@ -179,6 +179,8 @@ navto() {
   if [[ "${1:-}" == "--remove" || "${1:-}" == "-r" || "${1:-}" == "--delete" || "${1:-}" == "-d" ]]; then
     shift
     local del_key="${1:-}"
+    # Strip " - name" suffix if present (from tab completion showing "key - name")
+    del_key="${del_key%% - *}"
     if [[ -z "$del_key" ]]; then
       echo "Usage: navto --remove|-r|--delete|-d <destination-key>"
       return 1
@@ -188,6 +190,8 @@ navto() {
   fi
 
   local key="${1:-}"
+  # Strip " - name" suffix if present (from tab completion showing "key - name")
+  key="${key%% - *}"
   if [[ -z "$key" ]]; then
     printf "Usage: navto <destination-key>\n\n"
     printf "\e[1;35m🧭 Available destinations:\e[0m\n"
@@ -301,3 +305,88 @@ navto() {
   fi
   return 0
 }
+
+# Bash completion function for navto
+_navto_completion() {
+  local cur prev words cword
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  words=("${COMP_WORDS[@]}")
+  cword=$COMP_CWORD
+
+  local json_file="$__NAVTO_DIR/navto.json"
+
+  # If jq is not available, no completion
+  if ! command -v jq >/dev/null 2>&1; then
+    return 0
+  fi
+
+  # If navto.json doesn't exist, no completion
+  if [[ ! -f "$json_file" ]]; then
+    return 0
+  fi
+
+  # If previous word is a removal flag, complete with destination keys (with names)
+  if [[ "$prev" == "--remove" || "$prev" == "-r" || "$prev" == "--delete" || "$prev" == "-d" ]]; then
+    # Get all keys and match manually (since we need to match on key but display "key - name")
+    local keys
+    mapfile -t keys < <(jq -r 'keys[]' "$json_file" 2>/dev/null | sort)
+    
+    # Build completions array with "key - name" format for display
+    local completions=()
+    local key name
+    for key in "${keys[@]}"; do
+      # Only include if key matches current prefix
+      if [[ -z "$cur" || "$key" == "$cur"* ]]; then
+        name="$(jq -r --arg k "$key" '.[$k].name' "$json_file" 2>/dev/null)"
+        # Store as "key - name" but we'll need to extract key for matching
+        completions+=("$key - $name")
+      fi
+    done
+    
+    # Use compopt to enable descriptions if available, otherwise just use the formatted strings
+    compopt -o nosort 2>/dev/null || true
+    COMPREPLY=("${completions[@]}")
+    return 0
+  fi
+
+  # If current word starts with a dash, complete with flags
+  if [[ "$cur" == -* ]]; then
+    COMPREPLY=($(compgen -W "--remove -r --delete -d" -- "$cur"))
+    return 0
+  fi
+
+  # Otherwise, complete with destination keys (with names)
+  # Get all keys and match manually (since we need to match on key but display "key - name")
+  local keys
+  mapfile -t keys < <(jq -r 'keys[]' "$json_file" 2>/dev/null | sort)
+  
+  # Build completions array with "key - name" format for display
+  local completions=()
+  local key name
+  for key in "${keys[@]}"; do
+    # Only include if key matches current prefix
+    if [[ -z "$cur" || "$key" == "$cur"* ]]; then
+      name="$(jq -r --arg k "$key" '.[$k].name' "$json_file" 2>/dev/null)"
+      # Store as "key - name" for display
+      completions+=("$key - $name")
+    fi
+  done
+  
+  # Use compopt to enable descriptions if available, otherwise just use the formatted strings
+  compopt -o nosort 2>/dev/null || true
+  COMPREPLY=("${completions[@]}")
+  return 0
+}
+
+# Register the completion function
+# Note: We show "key - name" in completions, and the navto function handles
+# extracting just the key part if "key - name" format is passed
+# Only register if we're in an interactive shell and bash-completion is available
+if [[ -n "${BASH_VERSION:-}" ]] && [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+  # Check if complete command is available (bash-completion)
+  if command -v complete >/dev/null 2>&1; then
+    complete -F _navto_completion navto 2>/dev/null || true
+  fi
+fi

@@ -700,6 +700,12 @@ Description:
       - If navto.json is missing, offers to create a starter template with common Linux directories
   - Styled output:
       - Uses ANSI colors/icons for headings and listings; falls back gracefully
+  - Tab completion:
+      - Press Tab after "navto " to see all available destinations with names
+      - Completions show format: "KEY - Name" (e.g., "P - Pictures")
+      - Works with partial key matching (e.g., type "P" then Tab shows "P - Pictures")
+      - Also works with --remove flag (shows destinations for removal)
+      - Automatically extracts just the key when completing (handles "key - name" format)
 
 File:
   ~/BASHRC/navto.json
@@ -719,10 +725,12 @@ Behaviors and Safeguards:
   - Stale path: if configured path no longer exists, offers single-confirm removal
   - Normalizes '~' to '\$HOME' when adding entries
   - Atomic JSON writes using jq to prevent corruption
+  - Tab completion gracefully handles missing jq or navto.json (no errors)
 
 Dependencies:
-  - jq (for reading/updating navto.json)
+  - jq (for reading/updating navto.json and tab completion)
   - eza (optional, for enhanced directory listing; falls back to ls)
+  - bash-completion (optional, for tab completion support)
 
 Examples:
   navto               # Show styled list of available destinations
@@ -730,6 +738,9 @@ Examples:
   navto d             # Case-insensitive: go to Documents
   navto --remove P    # Remove the Pictures destination
   navto R             # If R's path is missing, offers to remove the stale entry
+  navto <Tab>         # Show all destinations with names (e.g., "P - Pictures")
+  navto P<Tab>        # Complete to "P - Pictures" (extracts just "P" when selected)
+  navto --remove <Tab> # Show all destinations for removal with names
 EOF
                 return 0
                 ;;
