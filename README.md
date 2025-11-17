@@ -56,7 +56,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `weather` - Display current weather information
 - `pokefetch` - Fetch random Pokémon data
 - `timer` - Set and monitor simple named timers
-- `fastnote` - Quick note-taking to scratchpad
+- `fastnote` - Quick note-taking to scratchpad (supports list, clear, delete operations)
 - `motd` - Message-of-the-day display (supports stdin for `make`)
 - `dl-paper` - Download wallpapers from YouTube
 - `cmd-not-found` - Enhanced command-not-found handler

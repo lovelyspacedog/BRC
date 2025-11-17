@@ -571,6 +571,7 @@ Manage quick scratchpad notes stored in numbered files.
 
 Usage: fastnote [NUMBER] [ACTION]
        fastnote list
+       fastnote clear
 
 Description:
   - Creates and manages quick notes in ~/.fastnotes/ directory
@@ -580,6 +581,7 @@ Description:
 
 Commands:
   list            List all available notes
+  clear           Remove all notes (prompts for confirmation, defaults to N)
   <number>        Open/edit a note by number (default action)
   <number> delete Delete a note by number
   <number> open   Open/edit a note by number (explicit)
@@ -587,16 +589,20 @@ Commands:
 Behavior:
   - Without arguments: opens note 0 (creates if it doesn't exist)
   - "fastnote list": lists all available notes
+  - "fastnote clear": removes all notes after confirmation (prompts with [y/N], defaults to N)
   - "fastnote <n>": opens note number n in editor (creates if needed)
   - "fastnote <n> delete": deletes note number n
   - Creates ~/.fastnotes directory automatically if it doesn't exist
   - Uses \$EDITOR environment variable (defaults to nvim)
+  - Clear command shows count of notes that will be deleted
+  - Clear command requires explicit confirmation (y or yes, case-insensitive)
 
 Dependencies:
   - mkdir (for creating directory)
   - touch (for creating note files)
   - basename, sed (for listing notes)
   - rm (for deleting notes)
+  - read (for confirmation prompts)
   - Editor specified in \$EDITOR (default: nvim)
 
 Files:
@@ -608,9 +614,13 @@ Examples:
   fastnote list         # List all notes
   fastnote 2 delete     # Delete note 2
   fastnote 5 open       # Explicitly open note 5
+  fastnote clear        # Remove all notes (prompts for confirmation)
 
 Note: Note numbers must be positive integers or zero. The function will
       create note files automatically if they don't exist when opened.
+      The "clear" command prompts for confirmation before deleting all notes,
+      and defaults to "N" (no) for safety. Only "y" or "yes" (case-insensitive)
+      will proceed with deletion.
 EOF
                 return 0
                 ;;
