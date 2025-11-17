@@ -27,7 +27,8 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 ### 📦 Included Plugins & Functions
 
 #### Core Functions
-- `backup()` / `backup_all()` - Create timestamped backups
+- `backdoc()` - Backup file to ~/Documents/Backups/ directory
+- `backup()` / `backup_all()` - Create timestamped backups (use `--store`/`-s` flag to store in ~/Documents/Backups/)
 - `calc()` - Quick calculator using `bc`
 - `cpuinfo()` - Display CPU information
 - `genpassword()` - Generate secure passwords
@@ -235,7 +236,10 @@ echo "Hello world" | motd make   # Create/overwrite ~/motd.txt from stdin
 # System
 update               # System update helper
 cpuinfo              # CPU information
-backup <file>        # Backup a file
+backup <file>        # Backup a file (same directory)
+backup --store <file> # Backup a file to ~/Documents/Backups/
+backup -s <file>     # Short form: backup to ~/Documents/Backups/
+backdoc <file>       # Backup a file to ~/Documents/Backups/
 
 # BRC Management
 brchelp <function>    # Show manual for a function

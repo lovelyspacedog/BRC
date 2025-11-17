@@ -7,6 +7,7 @@ source "$__BASICS_DIR/_DEPENDENCY_CHECK.sh"
 # Functions ----------------------------------------------------------------
 
 # INDEX:
+# - backdoc()
 # - backup()
 # - backup_all()
 # - brcversion()
@@ -28,8 +29,55 @@ source "$__BASICS_DIR/_DEPENDENCY_CHECK.sh"
 # - xx()
 # - zd()
 
+# Run backup on file, then move the backup to ~/Documents/Backups/
+# Can also be used as backup function with --store or -s flag
+backdoc() {
+    if ! ensure_commands_present --caller "backdoc" cp date mkdir basename; then
+        return 123
+    fi
+
+    local file="$1"
+    [[ ! -f "$file" ]] && {
+        echo "Error: '$file' does not exist"
+        return 1
+    }
+
+    [[ ! -d "$HOME/Documents/Backups" ]] && {
+        mkdir -p "$HOME/Documents/Backups" || {
+            echo "Error: Failed to create '$HOME/Documents/Backups'"
+            echo "Backup not performed."
+            return 1
+        }
+    }
+
+    local timestamp
+    local filename
+    timestamp=$(date +%Y%m%d%H%M%S)
+    filename=$(basename "$file")
+    cp "$file" "$HOME/Documents/Backups/$filename.bak.$timestamp" || {
+        echo "Error: Failed to create backup of '$file'"
+        echo "Backup not performed."
+        return 2
+    }
+    
+    printf "Backup created at: %s\n" "$HOME/Documents/Backups/$filename.bak.$timestamp"
+    return 0
+}
+
 # Backup a single file to filename.bak.TIMESTAMP
+# Use --store or -s flag to backup to ~/Documents/Backups/ via backdoc()
 backup() {
+    # Check for --store or -s flag
+    if [[ "${1:-}" == "--store" || "${1:-}" == "-s" ]]; then
+        shift
+        if [[ -z "${1:-}" ]]; then
+            echo "Error: No file specified for backup --store"
+            return 1
+        fi
+        backdoc "$@"
+        return $?
+    fi
+
     if ! ensure_commands_present --caller "backup" cp date; then
         return 123
     fi

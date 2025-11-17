@@ -12,36 +12,105 @@ fi
 
 if [[ -n "$1" ]]; then
     case "$1" in
+        backdoc)
+            cat <<EOF
+backdoc - Backup File to Documents/Backups/
+
+Create a timestamped backup of a file in ~/Documents/Backups/.
+
+Usage: backdoc <file>
+
+Description:
+  - Creates a backup copy of a file with timestamp
+  - Stores backup in ~/Documents/Backups/ directory
+  - Backup filename format: filename.bak.YYYYMMDDHHMMSS
+  - Preserves original file
+  - Creates backup directory if it doesn't exist
+  - Extracts just the filename from paths (no nested directories)
+
+Behavior:
+  - Checks if file exists before backing up
+  - Creates ~/Documents/Backups/ directory if missing
+  - Extracts filename using basename (removes path components)
+  - Creates backup with current timestamp in backup directory
+  - Displays confirmation message with backup location
+  - Returns error if file doesn't exist
+  - Returns error if backup directory creation fails
+
+Dependencies:
+  - cp (for copying file)
+  - date (for timestamp generation)
+  - mkdir (for creating backup directory)
+
+Examples:
+  backdoc script.sh                    # Creates ~/Documents/Backups/script.sh.bak.20250114123045
+  backdoc config.txt                   # Creates ~/Documents/Backups/config.txt.bak.20250114123045
+  backdoc path/to/file.txt             # Creates ~/Documents/Backups/file.txt.bak.20250114123045
+
+Note: The backup file includes a timestamp in the format YYYYMMDDHHMMSS.
+      Original file is preserved unchanged. The backup is stored in a centralized
+      location (~/Documents/Backups/) regardless of the original file's location.
+      Path components are stripped, so only the filename is used for the backup.
+      See also backup() with --store flag for equivalent functionality.
+EOF
+            return 0
+            ;;
         backup)
             cat <<EOF
 backup - Backup a Single File
 
-Create a timestamped backup of a file.
+Create a timestamped backup of a file, optionally storing in ~/Documents/Backups/.
 
 Usage: backup <file>
+       backup --store <file>
+       backup -s <file>
+
+Options:
+  --store, -s    Store backup in ~/Documents/Backups/ directory
+                 Equivalent to calling backdoc() with the file
+                 Creates backup directory if it doesn't exist
+                 Extracts just the filename from paths
 
 Description:
   - Creates a backup copy of a file with timestamp
+  - By default: creates backup in same directory as original file
+  - With --store/-s: creates backup in ~/Documents/Backups/ directory
   - Backup filename format: filename.bak.YYYYMMDDHHMMSS
   - Preserves original file
   - Provides simple file backup functionality
 
 Behavior:
-  - Checks if file exists before backing up
-  - Creates backup with current timestamp
-  - Displays confirmation message with backup filename
-  - Returns error if file doesn't exist
+  - Without --store/-s flag:
+    - Checks if file exists before backing up
+    - Creates backup with current timestamp in same directory
+    - Displays confirmation message with backup filename
+    - Returns error if file doesn't exist
+  - With --store/-s flag:
+    - Delegates to backdoc() function
+    - Creates ~/Documents/Backups/ directory if missing
+    - Extracts filename using basename (removes path components)
+    - Stores backup in centralized backup directory
+    - Returns error if file doesn't exist or backup fails
 
 Dependencies:
   - cp (for copying file)
   - date (for timestamp generation)
+  - mkdir (for creating backup directory, when using --store/-s)
+  - backdoc() function (when using --store/-s)
 
 Examples:
-  backup script.sh           # Creates script.sh.bak.20250114123045
-  backup config.txt          # Creates config.txt.bak.20250114123045
+  backup script.sh                     # Creates script.sh.bak.20250114123045 (same directory)
+  backup config.txt                    # Creates config.txt.bak.20250114123045 (same directory)
+  backup --store script.sh             # Creates ~/Documents/Backups/script.sh.bak.20250114123045
+  backup -s config.txt                 # Creates ~/Documents/Backups/config.txt.bak.20250114123045
+  backup --store path/to/file.txt      # Creates ~/Documents/Backups/file.txt.bak.20250114123045
 
 Note: The backup file includes a timestamp in the format YYYYMMDDHHMMSS.
-      Original file is preserved unchanged.
+      Original file is preserved unchanged. Without the --store/-s flag, the
+      backup is created in the same directory as the original file. With the
+      --store/-s flag, the backup is stored in ~/Documents/Backups/ and path
+      components are stripped from the filename. See also backdoc() for direct
+      access to the stored backup functionality.
 EOF
             return 0
             ;;
@@ -878,6 +947,7 @@ EOF
                 # Normal mode: show error and list
                 echo "No manual entry found for base function: $1"
                 echo "Available base functions:"
+                echo "  backdoc       - Backup file to Documents/Backups/"
                 echo "  backup        - Backup a single file"
                 echo "  backup_all    - Backup all files in current directory"
                 echo "  brcversion    - Show BRC version"
@@ -912,6 +982,7 @@ Core utility functions for common tasks.
 Usage: brchelp base [FUNCTION]
 
 Available base functions:
+  backdoc       - Backup file to Documents/Backups/
   backup        - Backup a single file
   backup_all    - Backup all files in current directory
   brcversion    - Show BRC version
