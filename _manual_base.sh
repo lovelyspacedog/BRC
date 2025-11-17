@@ -634,6 +634,68 @@ Note: This is a simple wrapper around nvim. Without arguments, it opens
 EOF
             return 0
             ;;
+        notifywhendone)
+            cat <<EOF
+notifywhendone - Run Command and Notify on Completion
+
+Execute a command and send a desktop notification when it completes (success or error), including execution time.
+
+Usage: notifywhendone <command> [arguments...]
+
+Description:
+  - Runs a command and waits for it to complete
+  - Tracks execution time from start to finish
+  - Sends a desktop notification when the command finishes
+  - Shows success or error status in the notification
+  - Displays execution time in a human-readable format
+  - Displays a readable representation of the command that was executed
+  - Preserves the command's exit code
+  - Useful for long-running commands where you want to be notified of completion
+
+Behavior:
+  - Requires notify-send to be available (returns error 123 if missing)
+  - Builds a readable command string from the provided arguments
+  - Properly quotes arguments containing spaces or special characters
+  - Records start time before executing the command
+  - Executes the command with all provided arguments
+  - Calculates elapsed time after command completion
+  - Formats elapsed time: seconds (< 60s), minutes and seconds (< 1h), or hours, minutes, and seconds
+  - On success: sends "Done" notification with success message and execution time
+  - On failure: sends "Error" notification with error code and execution time
+  - Prints notification message to stderr
+  - Returns the exit code of the executed command (0 for success, non-zero for failure)
+
+Command String Formatting:
+  - Arguments with spaces or special characters are automatically quoted
+  - Uses single quotes when possible (simpler display)
+  - Uses double quotes with escaping when single quotes are present
+  - Special characters are properly escaped for display
+
+Dependencies:
+  - notify-send (for desktop notifications)
+
+Time Formatting:
+  - Less than 60 seconds: displays as "45s"
+  - Less than 1 hour: displays as "2m 30s"
+  - 1 hour or more: displays as "1h 15m 30s"
+
+Examples:
+  notifywhendone make build              # Run make build, notify when done (e.g., "completed successfully in 45s")
+  notifywhendone npm install             # Run npm install, notify when done (e.g., "completed successfully in 2m 30s")
+  notifywhendone rsync -av source/ dest/ # Run rsync, notify when done (e.g., "completed successfully in 1h 15m 30s")
+  notifywhendone "long command with spaces"  # Properly handles quoted commands
+
+Note: This function is ideal for long-running commands where you want to
+      step away from the terminal and be notified when the command completes.
+      The notification includes a readable representation of the command that
+      was executed and the execution time, making it easy to identify which
+      command finished and how long it took. The function preserves the command's
+      exit code, so it can be used in scripts that check for success or failure.
+      If notify-send is not available, the function will return error code 123
+      without executing the command.
+EOF
+            return 0
+            ;;
         pwd)
             cat <<EOF
 pwd - Print Working Directory (Enhanced)
@@ -961,6 +1023,7 @@ EOF
                 echo "  h             - Quick history viewer"
                 echo "  mkcd          - Make directory and change into it"
                 echo "  n             - Open in Neovim"
+                echo "  notifywhendone - Run command and notify on completion"
                 echo "  pwd           - Print working directory (enhanced)"
                 echo "  silent        - Run command silently"
                 echo "  swap          - Swap two filenames safely"
@@ -996,6 +1059,7 @@ Available base functions:
   h             - Quick history viewer
   mkcd          - Make directory and change into it
   n             - Open in Neovim
+  notifywhendone - Run command and notify on completion
   pwd           - Print working directory (enhanced)
   silent        - Run command silently
   swap          - Swap two filenames safely

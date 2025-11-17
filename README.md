@@ -35,6 +35,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `h()` - Enhanced history search
 - `mkcd()` - Create directory and cd into it
 - `n()` - Open files/directories in Neovim
+- `notifywhendone()` - Run command and notify on completion (tracks execution time)
 - `update()` - System update helper
 - `woof()` - Desktop notifications
 - `xx()` - Open files in new terminal window
