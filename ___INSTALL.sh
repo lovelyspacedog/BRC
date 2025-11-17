@@ -1,7 +1,33 @@
 #!/bin/bash
-CURRENT_VERSION="0.2025.11.16" 
+CURRENT_VERSION="0.2025.11.17" 
 COPYRIGHT="${COPYRIGHT:-true}"
 msg="Made by Tony Pup (c) 2025. All rights reserved.    Rarf~~! <3"
+
+CHANGELOG="$(cat <<'EOF'
+Thanks for trying out my bull-shit bashrc!
+Changes since commit dbab0b2 (0.2025.11.16):
+
+Major Features:
+- Added brcfortune script: Display fortune cookies with animated typewriter effect
+  - Customizable typewriter speeds, formatting options (--clear, --upper, --lower, --no-a)
+  - Integrated into installation and documentation
+- Added tab completion for navto command: Shows 'KEY - Name' format with partial matching
+- Added centralized backup functionality: New backdoc() function and backup() --store flag
+  - Centralized backups in ~/Documents/Backups/ with timestamped filenames
+- Added notifywhendone() function: Run commands and send desktop notifications on completion
+- Enhanced brcupdate: Added --ignore-this-version flag with version.mask support
+
+Enhancements:
+- fastnote tool: Added 'clear' command to delete all notes with confirmation
+- brchelp command: Added help options (help, --help, -h, brchelp)
+- navto refactoring: Extracted template generation into reusable function
+- navto template: Standardized system directory display names
+
+Maintenance:
+- Git cleanup: Untracked navto.json (user-specific file)
+- Documentation: Multiple updates to README.md and manual pages
+EOF
+)"
 
 ! ! ! ! ! $COPYRIGHT || {
   clear
@@ -901,6 +927,11 @@ log_detail "Creating first run message in $HOME/motd.txt"
 if ! cat <<EOF > "$HOME/motd.txt"; then
 Installation was successful at ${motd_timestamp} !
 Version: $CURRENT_VERSION
+
+CHANGELOG="\$(cat <<'EOF'"
+$CHANGELOG
+EOF
+\)"
 
 Type brchelp to show the manual for a specific function.
 Type available to list all functions available after sourcing ~/.bashrc.
