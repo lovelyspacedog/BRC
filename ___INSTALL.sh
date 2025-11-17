@@ -5,6 +5,17 @@ msg="Made by Tony Pup (c) 2025. All rights reserved.    Rarf~~! <3"
 
 CHANGELOG="$(cat <<'EOF'
 Thanks for trying out my bull-shit bashrc!
+
+Important!
+The new plugin, brcfortune.sh, is now installed but not in _PLUGINS.sh yet.
+I'll implement a way to automate this in future updates.
+
+Test if it works by typing:
+brcfortune
+
+If it doesn't work, type this one-liner to load it:
+echo 'source "$__PLUGINS_DIR/brcfortune.sh"' >> "$HOME/BASHRC/_PLUGINS.sh"
+
 Changes since commit dbab0b2 (0.2025.11.16):
 
 Major Features:
@@ -928,9 +939,9 @@ if ! cat <<MOTD_EOF > "$HOME/motd.txt"; then
 Installation was successful at ${motd_timestamp} !
 Version: $CURRENT_VERSION
 
-CHANGELOG="\$(cat <<'EOF'"
+CHANGELOG="\$(cat <<'CHANGELOG_EOF'"
 $CHANGELOG
-EOF
+CHANGELOG_EOF
 \)"
 
 Type brchelp to show the manual for a specific function.
