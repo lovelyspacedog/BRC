@@ -573,6 +573,7 @@ declare -a plugins=(
     "_BASE_FUNCTIONS.sh"   # Basic/Core helper functions
     "analyze-file.sh"      # Inspect file contents and metadata quickly
     "bashrc.sh"            # Load primary bash configuration helpers
+    "brcfortune.sh"        # Display fortune cookies with typewriter effect
     "cmd-not-found.sh"     # Command-not-found handler with yay/flatpak search
     "dl-paper.sh"          # Download wallpapers from YouTube
     "dots.sh"              # Manage dotfile shortcuts and navigation

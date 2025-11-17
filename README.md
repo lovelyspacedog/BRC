@@ -58,6 +58,7 @@ This readme was Cursor generated. Take it with a grain of salt, lol.
 - `timer` - Set and monitor simple named timers
 - `fastnote` - Quick note-taking to scratchpad (supports list, clear, delete operations)
 - `motd` - Message-of-the-day display (supports stdin for `make`)
+- `brcfortune` - Display fortune cookies with typewriter effect
 - `dl-paper` - Download wallpapers from YouTube
 - `cmd-not-found` - Enhanced command-not-found handler
   - Press any key during search to cancel immediately
@@ -234,6 +235,8 @@ timer <name> <sec>   # Set a timer
 pokefetch            # Show random Pokémon
 motd print           # Show message of the day
 echo "Hello world" | motd make   # Create/overwrite ~/motd.txt from stdin
+brcfortune           # Display fortune with typewriter effect
+brcfortune --zero    # Display fortune instantly (no animation)
 
 # System
 update               # System update helper
@@ -260,7 +263,7 @@ The following are optional but enhance functionality:
 - **zoxide** - Smart directory jumping
 - **shell-mommy** - Encouraging messages (`~/shell-mommy/shell-mommy.sh`)
 - **jq** - JSON parsing (has fallback)
-- **fortune** - For automotd feature
+- **fortune** - For automotd and brcfortune features
 - **curl** - For weather functions
 - **pokemon-colorscripts** & **fastfetch** - For pokefetch
 - **yt-dlp** & **ffmpeg** - For dl-paper

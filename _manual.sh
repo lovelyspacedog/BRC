@@ -182,6 +182,87 @@ Note: The ALIAS argument is case-insensitive and will display the contents
 EOF
                 return 0
                 ;;
+            brcfortune|brc-fortune)
+                cat <<EOF
+brcfortune - Display Fortune Cookies with Typewriter Effect
+
+Display fortune cookies with an animated typewriter effect and enhanced formatting.
+
+Usage: brcfortune [OPTIONS] [fortune-args...]
+
+Description:
+  - Wrapper around the fortune command with visual enhancements
+  - Displays fortune cookies with animated typewriter effect
+  - Supports fortune cookie format (title + fortune text separated by "%")
+  - Formats title in bold blue with dog paw emoji prefix
+  - Provides customizable typewriter speeds for title and fortune text
+  - Can disable typewriter effect for instant display
+  - Supports case transformation and terminal clearing
+
+Options:
+  --zero              Disable typewriter effect (instant display)
+  --custom <title_speed> <fortune_speed>
+                     Set custom typewriter speeds (in seconds per character)
+                     Use "-" for either speed to use default value
+                     Example: --custom 0.05 0.005 (faster speeds)
+                     Example: --custom - 0 (default title speed, instant fortune)
+  --clear             Clear terminal before displaying fortune
+  --upper             Convert fortune text to uppercase
+  --lower             Convert fortune text to lowercase
+  --no-a              Skip fortune -a flag (don't search all fortune files)
+  [fortune-args...]   Additional arguments passed directly to fortune command
+
+Typewriter Speeds:
+  - Default title speed: 0.1 seconds per character
+  - Default fortune speed: 0.01 seconds per character
+  - Use --zero to disable typewriter effect completely
+  - Use --custom to set custom speeds for title and/or fortune text
+  - Speeds must be positive floating point numbers (e.g., 0.05, 0.1, 1.0)
+
+Behavior:
+  - Retrieves fortune using fortune command with -a and -c flags (unless --no-a)
+  - Parses fortune cookie format: title and fortune text separated by "%" or "---"
+  - If no separator found, treats entire output as fortune text
+  - Processes title: removes parentheses, converts to uppercase, extracts basename if path-like
+  - Applies case transformation if --upper or --lower flags are set
+  - Clears terminal if --clear flag is set
+  - Displays title (if present) in bold blue with 🐾 prefix using typewriter effect
+  - Displays fortune text with typewriter effect
+  - Ensures final newline is present
+
+Fortune Cookie Format:
+  - Standard format: title on one line, "%" on its own line, fortune text
+  - Alternative format: title, "---" separator, fortune text
+  - If no separator found, entire output is treated as fortune text
+  - Title is processed and displayed separately from fortune text
+
+Dependencies:
+  - fortune (fortune cookie generator)
+  - tput (for terminal capabilities)
+  - head (for text processing)
+
+Examples:
+  brcfortune                    # Display fortune with default typewriter effect
+  brcfortune --zero             # Display fortune instantly (no typewriter effect)
+  brcfortune --clear            # Clear terminal before displaying fortune
+  brcfortune --upper            # Display fortune text in uppercase
+  brcfortune --lower            # Display fortune text in lowercase
+  brcfortune --custom 0.05 0.005  # Faster typewriter speeds
+  brcfortune --custom - 0       # Default title speed, instant fortune text
+  brcfortune --no-a             # Skip -a flag (don't search all fortune files)
+  brcfortune computers          # Pass "computers" argument to fortune command
+  brcfortune --clear --upper    # Combine multiple flags
+
+Note: The typewriter effect creates an animated display by printing each character
+      with a small delay. Use --zero for instant display or --custom to adjust
+      speeds. The --custom flag will echo the expanded command to stderr if you
+      use "-" for either speed value. The title (if present) is always displayed
+      in bold blue with a dog paw emoji prefix. Case transformation flags (--upper,
+      --lower) only affect the fortune text, not the title. The --clear flag uses
+      the clear command or ANSI escape sequences to clear the terminal screen.
+EOF
+                return 0
+                ;;
             cmd-not-found|cmd_not_found|command-not-found|cmd)
                 cat <<EOF
 cmd-not-found - Automatic Command Not Found Handler
@@ -1073,6 +1154,7 @@ Loaded Plugins:
   - _BASE_FUNCTIONS.sh  - Basic/Core helper functions
   - analyze-file.sh     - Inspect file contents and metadata quickly
   - bashrc.sh           - Load primary bash configuration helpers
+  - brcfortune.sh       - Display fortune cookies with typewriter effect
   - cmd-not-found.sh    - Command-not-found handler with yay/flatpak search
   - dl-paper.sh         - Download wallpapers from YouTube
   - dots.sh             - Manage dotfile shortcuts and navigation
@@ -1857,6 +1939,7 @@ Available functions:
   base            - Basic helper functions (submenu)
   bash-completion - Enhanced tab completion system
   bashrc          - Edit .bashrc or view aliases
+  brcfortune      - Display fortune cookies with typewriter effect
   cmd-not-found   - Automatic command not found handler
   blesh           - Bash Line Editor
   compress        - Create archives
