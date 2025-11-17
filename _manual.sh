@@ -1809,6 +1809,9 @@ EOF
                 source "$__manual_dir/_manual_base.sh" "$@"
                 return $?
                 ;;
+            brchelp|help|--help|-h)
+                # Show default help message
+                ;;
             *)
                 # Check if the entry is available under base functions
                 local __manual_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
