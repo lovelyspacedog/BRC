@@ -924,7 +924,7 @@ pause
 
 motd_timestamp="$(date +"%Y-%m-%d %H:%M:%S %Z")"
 log_detail "Creating first run message in $HOME/motd.txt"
-if ! cat <<EOF > "$HOME/motd.txt"; then
+if ! cat <<MOTD_EOF > "$HOME/motd.txt"; then
 Installation was successful at ${motd_timestamp} !
 Version: $CURRENT_VERSION
 
@@ -941,7 +941,7 @@ Type bashrc to edit the ~/.bashrc file.
 Type motd print to display the current message of the day.
 Type motd make to edit the message of the day.
 Type >>> motd shoo <<< to remove the message of the day file.
-EOF
+MOTD_EOF
   log_warn "Failed to create motd.txt message. Installation otherwise completed."
 else
   log_success "motd.txt created in $HOME"
